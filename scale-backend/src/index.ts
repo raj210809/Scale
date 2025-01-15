@@ -1,9 +1,10 @@
 import express from "express";
-import connectDB from "./config/db";
+// import connectDB from "./config/db";
 import dotenv from "dotenv";
 import cors from "cors";
-import passport from "./config/passport";
-import authRoutes from "./routes/auth.route";
+// import passport from "./config/passport";
+// import authRoutes from "./routes/auth.route";
+import productRoutes from "./routes/product.routes";
 
 dotenv.config();
 
@@ -23,13 +24,14 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Initialize Passport
-app.use(passport.initialize());
+// app.use(passport.initialize());
 
 // Connect to MongoDB
-connectDB();
+// connectDB();
 
 // Routes
-app.use("/auth", authRoutes);
+// app.use("/auth", authRoutes);
+app.use("/products" , productRoutes )
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
