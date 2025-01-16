@@ -8,24 +8,48 @@ import express from "express";
 
 export const signup = async (req: express.Request, res: express.Response): Promise<any> => {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, email, password, dateOfBirth, termsAccepted } = req.body;
 
-    if (!firstName || !lastName || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+    console.log("Received Signup Request:", { firstName, lastName, email, dateOfBirth, termsAccepted });
+
+    // Validate all fields
+    if (!firstName || !lastName || !email || !password || !dateOfBirth || termsAccepted === undefined) {
+      return res.status(400).json({ message: "All fields are required, including termsAccepted." });
     }
 
+    if (termsAccepted !== true) {
+      return res.status(400).json({ message: "You must accept the terms and conditions." });
+    }
+
+    // Check if the provided dateOfBirth is valid
+    const dob = new Date(dateOfBirth);
+    if (isNaN(dob.getTime())) {
+      return res.status(400).json({ message: "Invalid date of birth format." });
+    }
+
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
+    // Hash password and create user
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ firstName, lastName, email, password: hashedPassword });
+    const user = new User({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      dateOfBirth: dob,
+      termsAccepted, // Explicitly set this field
+    });
+
     await user.save();
 
     return res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    return res.status(500).json({ message: "Server error" });
+    console.error("Signup Error:", error); // Log the detailed error
+    return res.status(500).json({ message: "Server error", error });
   }
 };
 
