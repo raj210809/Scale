@@ -1,5 +1,9 @@
 import AWS from "aws-sdk"
 import express, {Response , Request} from "express"
+import Review from "../models/review.model";
+import Product from "../models/product.model";
+import mongoose from "mongoose";
+import { getPaginatedReviews } from "../Pagination";
 
 const s3 = new AWS.S3({
     accessKeyId: process.env.AMAZON_ACCESS_KEY_ID,
@@ -41,3 +45,80 @@ export const getPresignedUrls = async (req : Request, res : Response) : Promise<
         res.status(500).json({ message: "Failed to generate pre-signed URLs" });
     }
 };
+
+export const addProducts = async (req : Request, res : Response) : Promise<any> => {
+    try {
+        const products = await Product.create(req.body);
+        await products.save();
+        res.status(200).json({ message: "Product added successfully" });
+    } catch (error) {
+        console.log(error);
+    }
+} 
+
+export const getProducts = async (req : Request, res : Response) : Promise<any> => {
+    try {
+        const products = await Product.find();
+        res.status(200).json({ products });
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export const viewProduct = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const productId = req.params.product_id;
+      const page = parseInt(req.query.page as string) || 1;
+      const pageSize = parseInt(req.query.pageSize as string) || 3;
+  
+      // Fetch the product details
+      const product = await Product.findById(productId);
+  
+      if (!product) {
+        res.status(404).json({ message: "Product not found" });
+        return;
+      }
+  
+      // Fetch the paginated reviews
+      const paginatedReviews = await getPaginatedReviews(productId, page, pageSize);
+  
+      res.status(200).json({
+        product,
+        paginatedReviews,
+      });
+    } catch (error) {
+      console.error("Error in viewProduct:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  };
+
+export const writeReviews = async (req : Request, res : Response) : Promise<any> => {
+    const { user_id,product_id,images,rating,comments,date } = req.body; 
+    
+    if(!user_id || !product_id || !rating || !comments || !date){
+        return res.status(400).json({ message: "Invalid data" });
+    }
+    try {
+        const review = await Review.create({ 
+            user:user_id,
+            product:product_id,
+            images:images,
+            rating:rating,
+            comments:comments,
+            date:date });
+
+        await review.save();
+
+        res.status(200).json({ message: "Review added successfully" });
+
+        await Product.findByIdAndUpdate(
+            product_id,
+            { $push: { reviews: review._id } },
+            { new: true, useFindAndModify: false } 
+          );
+          console.log("Review added to successfully.");
+
+    } catch (error) {
+        console.log(error);
+    }
+}
