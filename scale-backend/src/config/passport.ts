@@ -5,15 +5,16 @@ import User from '../models/user.model';
 
 // Google Strategy
 passport.use(
-  new GoogleStrategy(
+  new GoogleStrategy( 
     {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: '/auth/google/callback',
+      callbackURL: 'http://localhost:3000/auth/google/callback',
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        let user = await User.findOne({ googleId: profile.id });
+        console.log(accessToken,profile)
+    /*    let user = await User.findOne({ googleId: profile.id });
         if (!user) {
           user = await User.create({
             googleId: profile.id,
@@ -22,7 +23,8 @@ passport.use(
             lastName: profile.name?.familyName || '',
           });
         }
-        done(null, user);
+          */
+        return done(null, profile);
       } catch (error) {
         done(error, undefined);
       }
