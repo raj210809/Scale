@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Review from "../models/review.model";
+import Review from "../src/models/review.model";
 
 export const getPaginatedReviews = async (
     product_id: string,

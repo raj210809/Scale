@@ -1,6 +1,8 @@
 import AWS from "aws-sdk"
 import express, {Response , Request} from "express"
 
+import  { IProduct } from "../models/product.model"
+
 const s3 = new AWS.S3({
     accessKeyId: process.env.AMAZON_ACCESS_KEY_ID,
     secretAccessKey: process.env.AMAZON_ACCESS_SECRET,

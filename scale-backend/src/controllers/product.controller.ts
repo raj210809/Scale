@@ -5,14 +5,15 @@ import Product from "../models/product.model";
 import mongoose from "mongoose";
 import { getPaginatedReviews } from "../Pagination";
 
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AMAZON_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AMAZON_ACCESS_SECRET,
-    region : "ap-south-1"
-})
+
 
 export const getPresignedUrls = async (req : Request, res : Response) : Promise<any> => {
-    const { fileTypes } = req.body; // Expecting an array of file types
+    const S3 = new AWS.S3({
+        accessKeyId: process.env.AMAZON_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AMAZON_ACCESS_SECRET,
+        region : "ap-south-1"
+    })
+    const { fileTypes } = req.body;
 
     if (!Array.isArray(fileTypes) || fileTypes.length === 0) {
         return res.status(400).json({ message: "Invalid fileTypes format" });
@@ -29,12 +30,11 @@ export const getPresignedUrls = async (req : Request, res : Response) : Promise<
             const s3Params = {
                 Bucket: "econsappbucket", // Replace with your bucket name
                 Key: key,
-                Expires: 60 * 10, // URL expiry time in seconds
+                Expires: 60 * 10,
                 ContentType: fileType,
-                ACL: "public-read",
             };
 
-            const presignedUrl = await s3.getSignedUrlPromise("putObject", s3Params);
+            const presignedUrl = await S3.getSignedUrlPromise("putObject", s3Params);
 
             urls.push({ presignedUrl, key });
         }
@@ -47,14 +47,17 @@ export const getPresignedUrls = async (req : Request, res : Response) : Promise<
 };
 
 export const addProducts = async (req : Request, res : Response) : Promise<any> => {
+
+    const {products} = req.body;
+    products.forEach(async (product : any) => {
     try {
-        const products = await Product.create(req.body);
+        const products = await Product.create(product);
         await products.save();
         res.status(200).json({ message: "Product added successfully" });
     } catch (error) {
         console.log(error);
     }
-} 
+},); }
 
 export const getProducts = async (req : Request, res : Response) : Promise<any> => {
     try {
@@ -62,6 +65,51 @@ export const getProducts = async (req : Request, res : Response) : Promise<any> 
         res.status(200).json({ products });
     } catch (error) {
         console.log(error);
+    }
+}
+export const getProductByIds = async (req: Request, res: Response): Promise<any> => {
+    const { ids } = req.query;
+    if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ message: 'Invalid or missing "ids" in the request body.' });
+    }
+
+    try {
+        // Fetch products by IDs
+        const products = await Product.find({ _id: { $in: ids } });
+
+        // Check if any products are found
+        if (products.length === 0) {
+            return res.status(404).json({ message: 'No products found for the provided IDs.' });
+        }
+
+        // Send response with products
+        res.status(200).json({ products });
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        res.status(500).json({ message: 'An error occurred while fetching products.' });
+    }
+};
+
+export const getProductByBrand = async (req: Request, res: Response) : Promise<any> => {
+    const { brand } = req.query;
+    if (!brand) {
+        return res.status(400).json({ message: 'Invalid or missing "brand" in the request body.' });
+    }
+
+    try {
+        // Fetch products by brand
+        const products = await Product.find({ brand });
+
+        // Check if any products are found
+        if (products.length === 0) {
+            return res.status(404).json({ message: 'No products found for the provided brand.' });
+        }
+
+        // Send response with products
+        res.status(200).json({ products });
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        res.status(500).json({ message: 'An error occurred while fetching products.' });
     }
 }
 
@@ -93,19 +141,19 @@ export const viewProduct = async (req: Request, res: Response): Promise<void> =>
   };
 
 export const writeReviews = async (req : Request, res : Response) : Promise<any> => {
-    const { user_id,product_id,images,rating,comments,date } = req.body; 
+    const { name,product_id,images,rating,comments,date } = req.body; 
     
-    if(!user_id || !product_id || !rating || !comments || !date){
+    if(!name || !product_id || !rating || !comments){
         return res.status(400).json({ message: "Invalid data" });
     }
     try {
         const review = await Review.create({ 
-            user:user_id,
+            name:name,
             product:product_id,
             images:images,
             rating:rating,
             comments:comments,
-            date:date });
+        });
 
         await review.save();
 
@@ -118,6 +166,19 @@ export const writeReviews = async (req : Request, res : Response) : Promise<any>
           );
           console.log("Review added to successfully.");
 
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+const getReview = async (req: Request, res: Response) : Promise<any> => {
+    const ids = req.query.ids as string;
+    if (!ids) {
+        return res.status(400).json({ message: 'Invalid or missing "ids" in the request body.' });
+    }
+    try {
+        const reviews = await Review.find({ _id: { $in: ids } });
+        res.status(200).json({ reviews });
     } catch (error) {
         console.log(error);
     }

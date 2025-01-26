@@ -5,6 +5,12 @@ import cors from "cors";
 // import passport from "./config/passport";
 // import authRoutes from "./routes/auth.route";
 import productRoutes from "./routes/product.routes";
+import connectDB from "./config/db";
+import updateRoutes from "../src/routes/updates.routes";
+import addressRoutes from "./routes/address.routes"
+import cartRoutes from "./routes/cart.routes"
+import bookmarkRoutes from "./routes/bookmark.routes"
+import { orderProcessing } from "./controllers/orderProcess.controller";
 
 dotenv.config();
 
@@ -27,11 +33,16 @@ app.use(cors(corsOptions));
 // app.use(passport.initialize());
 
 // Connect to MongoDB
-// connectDB();
+connectDB();
 
 // Routes
 // app.use("/auth", authRoutes);
-app.use("/products" , productRoutes )
+app.use("/products" , productRoutes)
+app.use("/updates" , updateRoutes)
+app.use("/address", addressRoutes)
+app.use("/cart", cartRoutes)
+app.use("/bookmark", bookmarkRoutes)
+app.post("/orderProcessing" , orderProcessing)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
