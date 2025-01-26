@@ -17,9 +17,13 @@ import FilterMenu from '../components/filtermenu';
 import Indexsearch from '@/components/section/indexsearch';
 import { ShareButtonProvider, useShareButton } from '@/context/sharebutton';
 import SharePage from '@/components/bottomsheet/sharepage';
-import WelcomeScreenSeller from '../onboardingseller/WelcomeScreen';
+import WelcomeScreenSeller from '../../../scale-frontend-seller/app/onboardingseller/WelcomeScreen';
+
+//6788e8786d5e4f7411b20b5e
 
 export default function HomeScreen() {
+  const cloudfront = process.env.CLOUDFRONT_URL
+  console.log(cloudfront)
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalVisible, setModalVisible] = useState(false);
   const [suggestions, setSuggestions] =useState<string[]>([]);
@@ -54,13 +58,11 @@ export default function HomeScreen() {
 
   const handleSuggestionPress = (suggestion) => {
     setSearchQuery(suggestion);
-    setSuggestions([]); // Clear suggestions after selection
+    setSuggestions([]); 
     console.log("Search for:", suggestion);
-    // Add logic to handle search functionality here
   };
 
-  const token = false;
-  const login = "seller"
+  const token = true;
 
   return <ShareButtonProvider>{
     token ? (
@@ -70,7 +72,7 @@ export default function HomeScreen() {
           <View style={styles.topbar}>
             <Text style={styles.heading}>Scale</Text>
             <View style={styles.innerbox}>
-              <TouchableOpacity onPress={() => router.push('/seller/(tabs)')}>
+              <TouchableOpacity onPress={() => router.push('/Updates')}>
                 <FontAwesome name="bell" size={20} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => router.push('/Bookmark')}>
@@ -92,10 +94,9 @@ export default function HomeScreen() {
           <Realreviews/>
           </View>
         </ScrollView>
-        {isShared && <SharePage onClose={toggleShared}  studentid="24y62"/>}
       </GestureHandlerRootView>
     ) : (
-      login === "seller" ? <WelcomeScreenSeller/> : <WelcomeScreen />
+       <WelcomeScreen />
     )}</ShareButtonProvider>
 }
 

@@ -1,7 +1,8 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View, FlatList } from 'react-native';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import ProductCard from '../cards/productshowsmall';
+import axios from 'axios';
 
 interface props {
     onClose : () => void , 
@@ -9,6 +10,30 @@ interface props {
 }
 
 const Productbottomsheet : React.FC<props> = ({ onClose, studentid }) => {
+
+  const [product, setProducts] = useState([]);
+
+  const ids = ["6793bbef4d0168be58cb12a6" , "6793bca74d0168be58cb12a9" , "6793bcb44d0168be58cb12ac"]
+
+  const fetchproducts = async () => {
+    console.log("hvgk")
+    try {
+      const response = await axios.get("http://192.168.13.61:3000/products/get-product-by-ids",{
+        params : {
+          ids
+        }
+      })
+      setProducts(response.data.products)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    fetchproducts()
+  }, [])
+
+
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   const handleSheetChange = useCallback((index) => {
@@ -66,9 +91,9 @@ const Productbottomsheet : React.FC<props> = ({ onClose, studentid }) => {
     >
       <BottomSheetView>
         <FlatList
-          data={products}
+          data={product}
           renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item._id}
         />
       </BottomSheetView>
     </BottomSheet>

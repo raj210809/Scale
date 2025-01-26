@@ -11,7 +11,7 @@ const { height, width } = Dimensions.get('window');
 const dummyData = [
   {
     id: '1',
-    uri: 'https://www.w3schools.com/html/mov_bbb.mp4',
+    uri: 'https://dl6941jkqyou0.cloudfront.net/products/1737329080911-79de7',
     products: [
       {
         id: 1,

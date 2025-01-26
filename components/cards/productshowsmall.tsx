@@ -4,14 +4,13 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, ImageBackground } from
 import Bookmark from '../buttons/bookmark';
 
 interface product {
-    id : number,
-    productImage : string,
-    productName : string,
-    productDescription : string,
-    productBrand : string,
-    productRating : number,
-    productReviewCount : number,
-    productPrice : number
+    _id : string,
+    images : string[],
+    name : string,
+    brief : string,
+    brand : string,
+    rating : number,
+    price : number
 }
 
 interface accressor {
@@ -24,29 +23,29 @@ const ProductCard = (item : product & accressor) => {
         <View style={{flexDirection:'row' , height:170}}>
         <View style={{width:'50%' , height : '100%'}}>
           <ImageBackground
-        source={{ uri: item.productImage }} 
+        source={{ uri: item?.images[0] || "https://placeholder.com/50" }} 
         style={styles.image}
         resizeMode='cover'
         >
-          <Bookmark/>
+          <Bookmark id={item._id} type='product'/>
         </ImageBackground>
         </View>
         <View style={styles.content}>
-        <Text style={styles.title}>{item.productName}</Text>
-        <Text style={styles.description}>{item.productDescription}</Text>
-        <Text style={styles.brand}>{item.productBrand}</Text>
+        <Text style={styles.title}>{item.name}</Text>
+        <Text style={styles.description}>{item.brief}</Text>
+        <Text style={styles.brand}>{item.brand}</Text>
         <View style={styles.ratingContainer}>
-          <Text style={styles.rating}>{item.productRating}</Text>
-          <Text style={styles.reviewCount}>({item.productReviewCount})</Text>
+          <Text style={styles.rating}>{item.rating}</Text>
+          <Text style={styles.reviewCount}>(126)</Text>
         </View>
-        <Text style={styles.price}>Rs {item.productPrice}</Text>
+        <Text style={styles.price}>Rs {item.price}</Text>
         </View>
         </View>
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.viewButton} onPress={()=>{router.push({
             pathname : "/product/[id]",
             params : {
-                id : item.id,
+                id : item._id,
                 accessor : item.accessor_name,
             }
           })}}>

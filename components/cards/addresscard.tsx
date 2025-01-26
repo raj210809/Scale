@@ -3,15 +3,20 @@ import React from 'react';
 import { Checkbox } from 'react-native-paper';
 
 interface AddressProps {
-  id: string;
+  _id: string;
   name: string;
   address: string;
-  phone: string;
+  pincode : string;
+  city : string;
+  state : string;
+  mobile: string;
+  address_type : string;
   checked: boolean;
+  locality : string;
   onPress: () => void;
 }
 
-const Addresscard = ({ id, name, address, phone, checked, onPress }: AddressProps) => {
+const Addresscard = ({ _id, name, address, mobile, checked, onPress , city , pincode , address_type , state , locality }: AddressProps) => {
   return (
     <View style={styles.card}>
       <Checkbox
@@ -19,8 +24,8 @@ const Addresscard = ({ id, name, address, phone, checked, onPress }: AddressProp
         onPress={onPress}
       />
       <Text style={styles.name}>{name}</Text>
-      <Text style={styles.address}>{address}</Text>
-      <Text style={styles.phone}>{phone}</Text>
+      <Text style={styles.address}>{address} , {city} , {state} , {pincode}</Text>
+      <Text style={styles.phone}>{mobile}</Text>
       <TouchableOpacity style={styles.editButton}>
         <Text style={styles.editButtonText}>Edit Address</Text>
       </TouchableOpacity>

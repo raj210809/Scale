@@ -6,30 +6,31 @@ import Share from '../buttons/share'
 import Bookmark from '../buttons/bookmark'
 
 interface item {
-    id : string,
-    image : string,
+    _id : string,
+    images : string[],
     name : string,
     brand : string,
     price : string,
     rating : string,
-    onSelectionChange: (item: { id: string; price: number; quantity: number; selected: boolean }) => void;
+    quantity : number
+    onSelectionChange: (item: { _id: string; price: number; quantity: number; selected: boolean }) => void;
 }
 
 const Checkoutcard = (item : item) => {
     const [checked, setChecked] = React.useState(false);
-    const [quantity, setQuantity] = React.useState(1);
+    const [quantity, setQuantity] = React.useState(item.quantity);
     const [size, setSize] = React.useState(6);
 
     const handleCheckboxToggle = () => {
         const newCheckedStatus = !checked;
         setChecked(newCheckedStatus);
-        item.onSelectionChange({ id : item.id, price: parseFloat(item.price), quantity, selected: newCheckedStatus });
+        item.onSelectionChange({ _id : item._id, price: parseFloat(item.price), quantity, selected: newCheckedStatus });
       };
     
       const handleQuantityChange = (newQuantity: number) => {
         setQuantity(newQuantity);
         if (checked) {
-          item.onSelectionChange({ id : item.id, price: parseFloat(item.price), quantity: newQuantity, selected: true });
+          item.onSelectionChange({ _id : item._id, price: parseFloat(item.price), quantity: newQuantity, selected: true });
         }
       };
   return (
@@ -42,8 +43,8 @@ const Checkoutcard = (item : item) => {
             />
             </View>
             <View style={{flexDirection : 'row' , width : '25%' , justifyContent : 'space-between' , alignItems : 'center'}}>
-                <Share dwawerfunc={()=>{}}/>
-                <Bookmark/>
+                <Share/>
+                <Bookmark id={item._id} type='product'/>
                 <FontAwesome name="trash" size={24} color="black" />
             </View>
         </View>
@@ -54,7 +55,7 @@ const Checkoutcard = (item : item) => {
         <Text style={styles.price}>₹ {item.price}</Text>
         <Text style={styles.rating}>⭐ {item.rating}</Text>
         </View>
-        <Image source={{ uri: item.image }} style={styles.image} />
+        <Image source={{ uri: item.images[0] }} style={styles.image} />
     </View>
     <View style={{flexDirection : 'row' , justifyContent : 'space-between' , width : "100%"}}>
     <View style={styles.actions}>

@@ -23,6 +23,7 @@ function RootLayoutContent() {
   const [drawer, setDrawer] = useState(false);
   const colorScheme = useColorScheme();
   const { isShared, toggleShared } = useShareButton(); // Access the context
+  
 
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -73,11 +74,11 @@ function RootLayoutContent() {
         {/* Product screen */}
         <Stack.Screen
           name="product/[id]"
-          options={{
+          options={({route})=>({
             headerTitle: '',
             headerRight: () => (
               <>
-                <Bookmark drawerfunc={setDrawer} />
+                <Bookmark id={route.params.id} type='product'/>
                 <Share />
               </>
             ),
@@ -89,7 +90,7 @@ function RootLayoutContent() {
               fontWeight: 'bold',
               fontSize: 18,
             },
-          }}
+          })}
         />
 
         {/* Other screens */}
@@ -129,7 +130,6 @@ function RootLayoutContent() {
           }}
         />
         <Stack.Screen name="reel" options={{ headerShown: false }} />
-        <Stack.Screen name="seller/(tabs)" options={{ headerShown: false }} />
       </Stack>
       {isShared && <SharePage onClose={toggleShared} studentid="54767"/>}
     </GestureHandlerRootView>

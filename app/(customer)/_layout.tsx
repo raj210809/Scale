@@ -35,6 +35,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+      name="trending"
+      options={{
+        title : "",
+        tabBarIcon : ({color}) => <FontAwesome name="fire" size={28} color={color}/>
+      }}/>
+      <Tabs.Screen
         name="chat"
         options={{
           title: '',

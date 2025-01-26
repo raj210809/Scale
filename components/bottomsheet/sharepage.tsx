@@ -104,6 +104,11 @@ const SharePage: React.FC<SharePageProps> = ({ onClose, studentid }) => {
     >
       <BottomSheetView style={styles.container}>
         <Text style={styles.headerText}>Share to</Text>
+        <View style={{width:"100%"}}>
+        <TouchableOpacity style={{borderWidth : 1 , borderColor : "grey" , width : 55 , height : 30 , marginBottom : 10 , borderRadius : 5 , justifyContent : "center" , alignItems : "center"}}>
+          <Text>Repost</Text>
+        </TouchableOpacity>
+        </View>
         <TextInput
           style={styles.searchInput}
           placeholder="Search by Name..."

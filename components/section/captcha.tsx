@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useState } from "react";
 import {
   View,
@@ -17,14 +18,28 @@ const generateCaptcha = () => {
   return captcha;
 };
 
-const CustomCaptcha = () => {
+const CustomCaptcha = (data : any) => {
   const [captcha, setCaptcha] = useState(generateCaptcha());
   const [userInput, setUserInput] = useState("");
+  let newData = {
+    data : data.data,
+    paymentMode : {
+      mode : "Cash on Delivery"
+    }
+  }
 
-  const handleVerify = () => {
+  const handleVerify =async () => {
     if (userInput.toUpperCase() === captcha) {
-      Alert.alert("Success", "CAPTCHA Verified Successfully!");
-      setCaptcha(generateCaptcha()); // Generate a new CAPTCHA
+      try {
+        const response = await axios.post("http://192.168.13.61:3000/orderProcessing",{
+          data : newData
+        })
+        if (response.status === 200) {
+          Alert.alert("Success", "Order Placed Successfully");
+        }
+      } catch (error) {
+        console.log(error)
+      }
       setUserInput(""); // Reset input
     } else {
       Alert.alert("Error", "CAPTCHA Verification Failed. Try Again.");

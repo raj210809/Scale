@@ -17,7 +17,7 @@ const reelleftswipe = () => {
             </View>
             <View style={{flexDirection : 'row' , height : 50 , justifyContent : 'space-between' , width : '15%' , alignItems : 'center'}}>
                 <Bookmark/>
-                <Share dwawerfunc={()=>{}}/>
+                <Share/>
             </View>
         </View>
         <Productbottomsheet onClose={()=>{}} studentid='12345'/>

@@ -1,0 +1,1 @@
+export const Cloudfronturl : string = "https://dl6941jkqyou0.cloudfront.net/"

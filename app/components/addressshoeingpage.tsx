@@ -1,32 +1,57 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import Addresscard from '@/components/cards/addresscard';
-import { router } from 'expo-router';
+import { useRouter , useLocalSearchParams } from 'expo-router';
+import axios from 'axios';
 
 const ChooseAddress = () => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
 
-  const addresses = [
-    {
-      id: '1',
-      name: 'Ruchika',
-      address: 'Address Line 1, Address Line 2, Address Line 3',
-      phone: '999*******',
-    },
-    {
-      id: '2',
-      name: 'Anshul',
-      address: 'Address Line 1, Address Line 2, Address Line 3',
-      phone: '999*******',
-    },
-  ];
+  const [addresses , setAddress] = useState([])
+  const router = useRouter()
+
+  const { selectedItems } = useLocalSearchParams();
+
+  // Parse the stringified data back to an object
+  const parsedSelectedItems = selectedItems ? JSON.parse(selectedItems) : {};
+  const user = "6788e8786d5e4f7411b20b5e"
+
+  let data = {
+    cartContent : parsedSelectedItems,
+    address : selectedAddress,
+    user : user
+  }
+
+
+  const userId = "6788e8786d5e4f7411b20b5e"
+
+  const fetchaddress = async () => {
+    try {
+      const response = await axios.get("http://192.168.13.61:3000/address/get-addresses",{
+        params : {
+          user : userId
+        }
+      })
+      setAddress(response.data.addresses)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  useEffect(()=>{
+    fetchaddress()
+  },[])
 
   const handleContinue = () => {
     if (!selectedAddress) {
       Alert.alert('Error', 'Please select an address before continuing.');
     } else {
-      console.log('Selected Address:', addresses.find((addr) => addr.id === selectedAddress));
-      router.push('/components/paymentpage');
+      console.log('Selected Address:', addresses.find((addr) => addr._id === selectedAddress));
+      router.push({
+        pathname : '/components/paymentpage',
+        params : {
+          data : JSON.stringify(data)
+        }
+      });
     }
   };
 
@@ -34,10 +59,10 @@ const ChooseAddress = () => {
     <ScrollView style={styles.container}>
       {addresses.map((item) => (
         <Addresscard
-          key={item.id}
+          key={item._id}
           {...item}
-          checked={selectedAddress === item.id}
-          onPress={() => setSelectedAddress(item.id)}
+          checked={selectedAddress === item._id}
+          onPress={() => setSelectedAddress(item._id)}
         />
       ))}
       <TouchableOpacity style={styles.addButton} onPress={()=> router.push("/components/add-address")}>

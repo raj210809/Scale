@@ -1,11 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import Updateshowing from '@/components/cards/updateshowing'
+import Postupdate from '@/components/section/postupdate'
+import AddProductSection from '@/components/section/addproduct'
 
 const Updates = () => {
   return (
     <View>
       <Updateshowing/>
+      <AddProductSection/>
     </View>
   )
 }

@@ -1,8 +1,9 @@
 import ProductCard from '@/components/cards/productshowsmall';
 import Reviewcard from '@/components/cards/reviewcard';
 import { FontAwesome } from '@expo/vector-icons';
+import axios from 'axios';
 import { useLocalSearchParams } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal } from 'react-native';
 
 import {
@@ -17,18 +18,17 @@ import {
 } from 'react-native';
 
 interface SimilarProduct {
-  id: number;
-  productImage: string;
-  productName: string;
-  productDescription: string;
-  productBrand: string;
-  productRating: number;
-  productReviewCount: number;
-  productPrice: number;
+  _id: number;
+  image: string[];
+  name: string;
+  brief: string;
+  brand: string;
+  rating: number;
+  price: number;
 }
 
 interface Review {
-  id: string;
+  _id: string;
   name: string;
   images: string[];
   rating: string;
@@ -38,28 +38,42 @@ interface Review {
 }
 
 interface mainproduct {
+  _id : string
   inventory : string;
   restock_date : string;
-  itemsld :string;
+  itemsold :string;
   avg_delivery_day : string;
   item_returned : string;
-  image : string[];
-  colorAvail : string[]
+  images : string[];
+  colorAvailable : string[]
   name : string;
   rating : string;
   numberOfRating : string;
   brand : string;
-  description : string;
-  sizeAvail : number[];
-  price : number;
+  brief : string;
+  sizeAvailable : number[];
+  price : string;
   features : string;
-  similarProduct : SimilarProduct[];
   reviews : Review[];
 }
 
 const ProductDetails = () => {
 
     const {accessor ,id} = useLocalSearchParams()
+    const [product , setproduct] = useState<mainproduct>()
+
+    const fetchProduct = async ()=>{
+      try {
+        const response = await axios.get(`http://192.168.13.61:3000/products/view-product/${id}`)
+        console.log(response.data.product)
+        setproduct(response.data.product)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    useEffect(() => {
+        fetchProduct()
+    }, [])
 
     const colorAvail = ["red" , "green" , "black" , "brown" ,"blue" , "pink"]
 
@@ -87,34 +101,31 @@ const ProductDetails = () => {
 
   const similarProducts = [
     {
-      id: 1,
-      productImage: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      productName: "Wireless Headphones",
-      productDescription: "High-quality wireless headphones with noise cancellation.",
-      productBrand: "SoundPro",
-      productRating: 4.5,
-      productReviewCount: 145,
-      productPrice: 99,
+      _id: "1",
+      images: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"],
+      name: "Wireless Headphones",
+      brief: "High-quality wireless headphones with noise cancellation.",
+      brand: "SoundPro",
+      rating: 4.5,
+      price: "99",
   },
   {
-      id: 2,
-      productImage: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      productName: "Wireless Headphones",
-      productDescription: "High-quality wireless headphones with noise cancellation.",
-      productBrand: "SoundPro",
-      productRating: 4.5,
-      productReviewCount: 145,
-      productPrice: 99,
+      id: "2",
+      images: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"],
+      name: "Wireless Headphones",
+      brief: "High-quality wireless headphones with noise cancellation.",
+      brand: "SoundPro",
+      rating: 4.5,
+      price: "99",
   },
   {
-      id: 3,
-      productImage: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      productName: "Wireless Headphones",
-      productDescription: "High-quality wireless headphones with noise cancellation.",
-      productBrand: "SoundPro",
-      productRating: 4.5,
-      productReviewCount: 145,
-      productPrice: 99,
+    _id : "3",
+    images: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"],
+    name: "Wireless Headphones",
+    brief: "High-quality wireless headphones with noise cancellation.",
+    brand: "SoundPro",
+    rating: 4.5,
+    price: "99",
   },
   ];
 
@@ -175,14 +186,29 @@ const ProductDetails = () => {
           </View>
       </View>)}
       <View style={styles.productSection}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={true} style={{width : "100%" , height : 250}}>
-          {image.map((item , index)=>{
-            return (
-              <View key={index}>
-                <Image source={{uri : "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"}} style={styles.productImage} key={index}/>
-              </View>)
-          })}
-        </ScrollView>
+      <ScrollView
+  horizontal
+  showsHorizontalScrollIndicator={true}
+  style={{ width: 350, height: 250 }}
+  contentContainerStyle={{ alignItems: "center" }} // Ensures images are vertically centered
+>
+  {product?.images?.map((item, index) => {
+    return (
+      <View key={index} style={{ marginRight: 10 , width : 350}}> {/* Adds spacing between images */}
+        <Image
+          source={{ uri: item }}
+          style={{
+            width: "100%", // Define explicit width
+            height: 250, // Define explicit height
+            borderRadius: 10, // Optional: Adds rounded corners
+            resizeMode: "contain", // Ensures images fill the container proportionally
+          }}
+        />
+      </View>
+    );
+  })}
+</ScrollView>
+
         <View style={{flexDirection : "row" , marginTop : 8 , justifyContent : 'flex-start'}}>
           {colorAvail.map((item)=>{
             return (
@@ -258,7 +284,7 @@ const ProductDetails = () => {
       <View style={styles.similarProductsSection}>
         <Text style={styles.sectionTitle}>Similar Top Picks</Text>
         {similarProducts.map((product) => (
-          <ProductCard {...product} key={product.id} accessor_name='customer'/>
+          <ProductCard key={product._id} {...product} accessor_name='customer'/>
         ))}
       </View>
 
@@ -328,7 +354,7 @@ const ProductDetails = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   productSection: { padding: 20 , width : "100%" },
-  productImage: { width: '100%', height: 250, resizeMode: 'contain' },
+  productImage: { width: '100%', height: "100%", resizeMode: 'contain' },
   productTitle: { fontSize: 20, fontWeight: 'bold', marginVertical: 10 },
   productRating: { fontSize: 14, color: '#666' },
   productDescription: { fontSize: 14, color: '#666', marginVertical: 10 },

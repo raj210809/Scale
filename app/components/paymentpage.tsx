@@ -3,9 +3,14 @@ import NBOptions from '@/components/section/netbanking';
 import PaymentOptions from '@/components/section/upiselection';
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet , Nstivemodu } from 'react-native';
+import {useLocalSearchParams} from "expo-router"
 
 const Payment = () => {
   const paymentMethods = ['UPI (all apps)', 'Cash on Delivery', 'Netbanking'];
+
+  const {data} = useLocalSearchParams()
+
+  const UsableData = data ? JSON.parse(data) : {}
 
   const [COD , setCOD] = useState(false);
   const [upi , setUpi] = useState(false);
@@ -20,7 +25,7 @@ const Payment = () => {
         <TouchableOpacity style={styles.methodButton} onPress={()=> setCOD(!COD)}>
           <Text style={styles.methodText}>Cash on Delivery</Text>
         </TouchableOpacity>
-        {COD && <CustomCaptcha />}
+        {COD && <CustomCaptcha data={UsableData}/>}
         <TouchableOpacity style={styles.methodButton} onPress={()=> setNetbanking(!netbanking)}>
           <Text style={styles.methodText}>Net Banking</Text>
         </TouchableOpacity>

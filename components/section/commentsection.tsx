@@ -3,8 +3,12 @@ import React from 'react'
 import { FontAwesome, Ionicons } from '@expo/vector-icons'
 import CommentCard from '../cards/commentcard'
 
-const Commentsection = () => {
+interface comment {
+    id : string,
+    type : string
+}
 
+const Commentsection = (prop : comment) => {
 
     const comments = [
         {
