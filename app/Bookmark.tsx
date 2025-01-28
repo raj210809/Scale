@@ -1,6 +1,7 @@
 import ProductCard from '@/components/cards/productshowsmall';
 import Reviewcard from '@/components/cards/realreviewcard';
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -19,8 +20,25 @@ const App = () => {
     setSearchQuery(query);
     console.log('Search Query:', query);
   };
-  // State to store the selected filter
   const [selectedFilter, setSelectedFilter] = useState('All');
+  const user = "6788e8786d5e4f7411b20b5e"
+
+  const [bookmarks, setBookmarks] = useState([]);
+
+  const fetchBookmarks = async () => {
+    try {
+      const response = await axios.get('http://192.168.13.61:3000/bookmark/get-bookmarks',{
+        params : {
+          user : user
+      }});
+      setBookmarks(response.data.bookmarks);
+    } catch (error) {
+      console.log(error);
+    }}
+
+    useEffect(() => {
+      fetchBookmarks();
+    }, []);
 
   const reviewCardData = [
     {
@@ -113,7 +131,7 @@ const App = () => {
   const filteredData =
     selectedFilter === 'All'
       ? data
-      : data.filter((item) => item.type === selectedFilter);
+      : bookmarks.filter((item) => (item.type as string).toLowerCase() === selectedFilter.toLowerCase());
 
   return (
     <>
@@ -159,12 +177,12 @@ const App = () => {
 
         {/* Render Data */}
         <FlatList
-          data={filteredData}
-          keyExtractor={(item) => item.id}
+          data={bookmarks}
+          keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
             <View style={styles.card}>
               <Text style={styles.cardTitle}>{item.title}</Text>
-              {item.type === 'Product' ? (
+              {item.type === 'product' ? (
                 <ProductCard {...item.product} accessor_name='customer'/>
               ) : (
                 <Reviewcard {...item.post}/>

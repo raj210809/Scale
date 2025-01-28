@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View , TouchableOpacity , BackHandler } from 'react-native'
+import { StyleSheet, Text, View , TouchableOpacity , BackHandler, Keyboard } from 'react-native'
 import React,{useState , useEffect , useRef} from 'react'
 import { Searchbar } from 'react-native-paper';
 import CategoryGrid from './searchclicksection';
@@ -79,6 +79,19 @@ const Indexsearch = (values : search) => {
             placeholder="Search"
             onChangeText={handleChange}
             value={searchQuery}
+            onSubmitEditing={() => {
+              router.push({
+                pathname : "/components/searchcomponent",
+                params : {searchfor : searchQuery}
+              })
+              Keyboard.dismiss(); // Dismiss the keyboard
+            }}
+            onIconPress={()=>{
+              router.push({
+                pathname : "/components/searchcomponent",
+                params : {searchfor : searchQuery}
+              });
+            }}
             onFocus={() => {setModalVisible(true)
               values.modalVisible(true)
               }

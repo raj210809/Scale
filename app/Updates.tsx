@@ -8,7 +8,6 @@ const Updates = () => {
   return (
     <View>
       <Updateshowing/>
-      <AddProductSection/>
     </View>
   )
 }

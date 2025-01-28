@@ -5,6 +5,7 @@ import { ScrollView } from 'react-native-gesture-handler'
 import Indexsearch from '@/components/section/indexsearch'
 import Launchingsoon from '@/components/section/launchingsoon'
 import Optionsection from '@/components/section/brandoption'
+import Categorygrid from '@/components/section/lookingFor'
 
 const trending = () => {
 
@@ -23,6 +24,7 @@ const trending = () => {
       <View style={{marginTop : 20 , padding : 10}}>
         <Text style={{fontSize : 23 , fontWeight : "bold"}}>Looking For ...</Text>
         </View>
+        <Categorygrid/>
     </ScrollView>
   )
 }

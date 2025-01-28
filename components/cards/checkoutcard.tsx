@@ -20,6 +20,7 @@ const Checkoutcard = (item : item) => {
     const [checked, setChecked] = React.useState(false);
     const [quantity, setQuantity] = React.useState(item.quantity);
     const [size, setSize] = React.useState(6);
+    const user = "6788e8786d5e4f7411b20b5e"
 
     const handleCheckboxToggle = () => {
         const newCheckedStatus = !checked;
@@ -43,7 +44,7 @@ const Checkoutcard = (item : item) => {
             />
             </View>
             <View style={{flexDirection : 'row' , width : '25%' , justifyContent : 'space-between' , alignItems : 'center'}}>
-                <Share/>
+                <Share color='black' data={{product : item , sender : user , type : "product"}}/>
                 <Bookmark id={item._id} type='product'/>
                 <FontAwesome name="trash" size={24} color="black" />
             </View>

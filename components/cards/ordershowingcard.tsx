@@ -3,8 +3,10 @@ import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Drawer } from "react-native-paper";
 import Orderextension from "../section/orderextension";
+import { mainproduct } from "@/app/product/[id]";
 
-interface OrderDetails {
+export interface OrderDetails {
+  _id: string;
   name: string;
   description: string;
   brand: string;
@@ -26,7 +28,37 @@ interface OrderDetails {
   };
 }
 
-const OrderCard = (prop : OrderDetails) => {
+export interface OrderData {
+  _id: string;
+  user: string;
+  product: mainproduct;
+  quantity: number;
+  payment: {
+    totalMRP: number;
+    discount: number;
+    shippingFee: number;
+    totalAmount: number;
+  };
+  status: string;
+  orderOn: string;
+  statusComment: string;
+  address: {
+    _id: string;
+    name: string;
+    address: string;
+    pincode : string;
+    city : string;
+    state : string;
+    mobile: string;
+    address_type : string;
+    checked: boolean;
+    locality : string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+const OrderCard = (prop : OrderData) => {
 
   const [isDrawer , setDrawer] = useState(false)
 
@@ -34,34 +66,34 @@ const OrderCard = (prop : OrderDetails) => {
     <View style={styles.card}>
       <View style={styles.header}>
       <Text style={styles.title} numberOfLines={1}>
-            {prop.name}
+            {prop.product.name}
         </Text>
         <View style={{flexDirection:'row'}}>
         <View style={{ flex: 1 }}>
           <Text style={styles.subtitle} numberOfLines={1}>
-            {prop.description}
+            {prop.product.brief}
           </Text>
-          <Text style={styles.brand}>{prop.brand}</Text>
+          <Text style={styles.brand}>{prop.product.brand}</Text>
           <View style={styles.ratingContainer}>
-            <Text style={styles.rating}>{prop.rating}</Text>
-            <Text style={styles.reviews}>({prop.reviews})</Text>
+            <Text style={styles.rating}>{prop.product.rating}</Text>
+            <Text style={styles.reviews}>(100)</Text>
           </View>
-            <Text style={styles.price}>{prop.price}</Text>
+            <Text style={styles.price}>{prop.product.price}</Text>
             <Text style={styles.sizeQuantity}>
-            Sz | {prop.size} Qt | {prop.quantity}
+            Sz | 6UK Qt | {prop.quantity}
             </Text>
         </View>
         <Image
-          source={{ uri: prop.image }}
+          source={{ uri: prop.product.images[0] }}
           style={styles.image}/>
         </View>
       </View>
 
       <TouchableOpacity style={[styles.deliveryButton , prop.status === "delivered" ? styles.delivered : null]} onPress={()=>{setDrawer(!isDrawer)}}>
-        <Text style={styles.deliveryText}>{prop.delivery}</Text>
+        <Text style={styles.deliveryText}>{prop.statusComment}</Text>
         <FontAwesome name={isDrawer === false ? "chevron-right" : "chevron-down"} size={16} color="#fff" />
       </TouchableOpacity>
-      <Text style={styles.orderTime}>{prop.orderTime}</Text>
+      <Text style={styles.orderTime}>{prop.statusComment}</Text>
       {isDrawer && <Orderextension {...prop} />}
     </View>
   );

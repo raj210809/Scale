@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Keyboard, TextInput } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { Searchbar } from 'react-native-paper';
 import { Dimensions } from 'react-native';
@@ -13,6 +13,7 @@ const IndexSearch = () => {
   const { searchfor } = useLocalSearchParams();
   const initialQuery = searchfor?.toString() || ''; // Handle cases where searchfor might be undefined
   const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [prop , setProp] = useState(initialQuery)
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [drawer , setdrawer] = useState(false);
   const searchBarRef = useRef(null);
@@ -48,7 +49,7 @@ const IndexSearch = () => {
   };
 
   const handleSearch = (query: string) => {
-    setSearchQuery(query);
+    setProp(query)
     setSuggestions([]);// Trigger the search results to display
   };
 
@@ -59,12 +60,16 @@ const IndexSearch = () => {
   return (
     <View style={{flex:1}}>
       <View style={styles.searchContainer}>
-        <Searchbar
-          ref={searchBarRef}
-          placeholder="Search"
-          onChangeText={handleChange}
-          value={searchQuery}
-        />
+      <Searchbar
+        ref={searchBarRef}
+        placeholder="Search"
+        onChangeText={handleChange}
+        value={searchQuery}
+        onSubmitEditing={() => {
+          handleSearch(searchQuery); // Run the function when "Done" or "Search" is pressed
+          Keyboard.dismiss(); // Dismiss the keyboard
+        }}
+      />
         {suggestions.length > 0 && (
           <View style={styles.suggestionsContainer}>
             {suggestions.map((item, index) => (
@@ -79,7 +84,7 @@ const IndexSearch = () => {
           </View>
         )}
       </View>
-      <Searchresult searchfor={searchQuery} />
+      <Searchresult searchfor={prop} />
       <TouchableOpacity style={{position: 'absolute', right: 10, bottom: 10 , height : 50 , width : 50 , borderRadius : 25 , backgroundColor : "#f8f9fa" , justifyContent : "center" , alignItems : "center"}} onPress={()=> setdrawer(true)}>
         <FontAwesome name="filter" size={35} />
       </TouchableOpacity>

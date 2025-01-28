@@ -1,29 +1,8 @@
 import { StyleSheet, Text, View , TouchableOpacity} from 'react-native'
 import React from 'react'
+import { OrderData } from '../cards/ordershowingcard'
 
-interface OrderDetails {
-    name: string;
-    description: string;
-    brand: string;
-    rating: number;
-    reviews: number;
-    price: string;
-    size: string;
-    quantity: string;
-    image: string;
-    delivery: string;
-    orderTime: string;
-    status: string;
-    address: string;
-    payment: {
-      totalMRP: string;
-      discount: string;
-      shippingFee: string;
-      totalAmount: string;
-    };
-  }
-
-const Orderextension = (orderDetails : OrderDetails) => {
+const Orderextension = (orderDetails : OrderData) => {
   return (
     <View>
       <View style={styles.statusContainer}>
@@ -35,7 +14,7 @@ const Orderextension = (orderDetails : OrderDetails) => {
             <View style={styles.circleEmpty} />
           </View>
           <Text style={styles.deliveryStatus}>{orderDetails.status}</Text>
-          <Text style={styles.deliveryTime}>{orderDetails.delivery}</Text>
+          <Text style={styles.deliveryTime}>{orderDetails.statusComment}</Text>
         </View>
         {orderDetails.status === "delivered" ? (<View style={{marginVertical : 10}}>
             <TouchableOpacity style={{height : 45 , justifyContent : "center" , alignItems : "center" , borderWidth : 1 , borderColor : "red" , marginTop : 5 , borderRadius : 4}}>
@@ -45,7 +24,7 @@ const Orderextension = (orderDetails : OrderDetails) => {
 
         {/* Delivery Address */}
         <Text style={styles.sectionTitle}>Delivery Address</Text>
-        <Text style={styles.address}>{orderDetails.address}</Text>
+        <Text style={styles.address}>{orderDetails.address.address} , {orderDetails.address.city} , {orderDetails.address.state} , {orderDetails.address.pincode} \n {orderDetails.address.mobile}</Text>
         <TouchableOpacity style={styles.changeAddressButton}>
           <Text style={styles.changeAddressText}>Change Address</Text>
         </TouchableOpacity>

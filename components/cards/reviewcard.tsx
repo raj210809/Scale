@@ -3,13 +3,12 @@ import React from 'react'
 import { ScrollView } from 'react-native-gesture-handler';
 
 interface ReviewCardProps {
-    id: string;
+    _id: string;
     name: string;
     images: string[];
     rating: string;
-    comment: string;
+    comments: string;
     date: string;
-    image: string;
 }
 
 const Reviewcard = (prop : ReviewCardProps) => {
@@ -30,7 +29,7 @@ const Reviewcard = (prop : ReviewCardProps) => {
         <Text style={styles.reviewRating}>⭐ {prop.rating}</Text>
         <Text style={styles.reviewName}>{prop.name}</Text>
         </View>
-        <Text style={styles.reviewComment}>{prop.comment}</Text>
+        <Text style={styles.reviewComment}>{prop.comments}</Text>
         <Text style={styles.reviewDate}>{prop.date}</Text>
         </View>
         </View>

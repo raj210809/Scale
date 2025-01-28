@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import Productbottomsheet from '../bottomsheet/products';
 import Reelcommentsheet from '../bottomsheet/reelcomment';
+import Share from '../buttons/share';
 
 const { height, width } = Dimensions.get('window');
 
@@ -142,7 +143,7 @@ const ReelSection = () => {
             <Text style={styles.buttonText}>0</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button}>
-            <Ionicons name="share-outline" size={30} color="white" />
+            <Share color='white'/>
             <Text style={styles.buttonText}>Share</Text>
           </TouchableOpacity>
         </View>

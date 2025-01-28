@@ -11,10 +11,13 @@ import {
 } from "react-native";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { Ionicons } from "@expo/vector-icons";
+import { useShareButton } from "@/context/sharebutton";
+import {useSocketStore} from "@/store/socketstore"
+
 
 const dummyData = [
   {
-    id: "1",
+    id: "6788e8786d5e4f7411b20b5f",
     name: "Abhinav Gulati",
     message: "Sure! This looks good. Let’s buy...",
     profileImage:
@@ -22,7 +25,7 @@ const dummyData = [
     time: "15 min",
   },
   {
-    id: "2",
+    id: "6788e8786d5e4f7411b20b60",
     name: "Akriti",
     message: "This shoe doesn’t look good :(",
     profileImage:
@@ -48,6 +51,13 @@ const SharePage: React.FC<SharePageProps> = ({ onClose, studentid }) => {
   const [selectedPeople, setSelectedPeople] = useState<string[]>([]);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [searchText, setSearchText] = useState("");
+  const {data} = useShareButton()
+  const {socket} = useSocketStore()
+
+  let sndingData = {
+    data : data,
+    receiver : selectedPeople
+  }
 
   const handleSheetChange = useCallback((index: number) => {
     console.log("Sheet position changed to index:", index);
@@ -69,7 +79,6 @@ const SharePage: React.FC<SharePageProps> = ({ onClose, studentid }) => {
       <Image source={{ uri: item.profileImage }} style={styles.profileImage} />
       <View style={styles.userDetails}>
         <Text style={styles.userName}>{item.name}</Text>
-        <Text style={styles.userMessage}>{item.message}</Text>
       </View>
       <Ionicons
         name={
@@ -88,8 +97,8 @@ const SharePage: React.FC<SharePageProps> = ({ onClose, studentid }) => {
   );
 
   const handleShare = () => {
-    console.log("Sharing with:", selectedPeople);
-    onClose(); // Close the bottom sheet
+    socket?.emit('sendMessage',sndingData)
+    onClose();
   };
 
   const snapPoints = ["80%"];

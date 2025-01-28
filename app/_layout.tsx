@@ -79,7 +79,7 @@ function RootLayoutContent() {
             headerRight: () => (
               <>
                 <Bookmark id={route.params.id} type='product'/>
-                <Share />
+                <Share color='black'/>
               </>
             ),
             headerStyle: {

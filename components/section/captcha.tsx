@@ -31,7 +31,7 @@ const CustomCaptcha = (data : any) => {
   const handleVerify =async () => {
     if (userInput.toUpperCase() === captcha) {
       try {
-        const response = await axios.post("http://192.168.13.61:3000/orderProcessing",{
+        const response = await axios.post("http://192.168.13.61:3000/order/orderProcessing",{
           data : newData
         })
         if (response.status === 200) {

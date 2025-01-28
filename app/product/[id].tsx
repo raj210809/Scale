@@ -1,10 +1,10 @@
 import ProductCard from '@/components/cards/productshowsmall';
 import Reviewcard from '@/components/cards/reviewcard';
 import { FontAwesome } from '@expo/vector-icons';
-import axios from 'axios';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Modal } from 'react-native';
+import { Alert, Modal } from 'react-native';
+import axios from 'axios';
 
 import {
   View,
@@ -18,13 +18,14 @@ import {
 } from 'react-native';
 
 interface SimilarProduct {
-  _id: number;
-  image: string[];
-  name: string;
-  brief: string;
-  brand: string;
-  rating: number;
-  price: number;
+  id: number;
+  productImage: string;
+  productName: string;
+  productDescription: string;
+  productBrand: string;
+  productRating: number;
+  productReviewCount: number;
+  productPrice: number;
 }
 
 interface Review {
@@ -32,41 +33,78 @@ interface Review {
   name: string;
   images: string[];
   rating: string;
-  comment: string;
+  comments: string;
   date: string;
-  image: string;
+}
+interface queries {
+    _id: string;
+    productName : string,
+    productId : string,
+    query : string,
+    answer : string,
+    brand : string,
+    hasAnswerd : boolean,
+    visibility : string
 }
 
 interface mainproduct {
-  _id : string
+  _id : string;
   inventory : string;
   restock_date : string;
   itemsold :string;
   avg_delivery_day : string;
   item_returned : string;
   images : string[];
-  colorAvailable : string[]
+  colorAvail : string[]
   name : string;
   rating : string;
   numberOfRating : string;
   brand : string;
   brief : string;
-  sizeAvailable : number[];
-  price : string;
+  sizeAvail : number[];
+  price : number;
   features : string;
+  similarProduct : SimilarProduct[];
   reviews : Review[];
 }
 
 const ProductDetails = () => {
 
     const {accessor ,id} = useLocalSearchParams()
+
+    const [text, setText] = useState("");
+
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post("http://192.168.13.61:3000/query/postQuery",{
+        productName : product?.name,
+        brand : product?.brand,
+        query : text,
+        productId : id
+      })
+      if (response.status === 201){
+        Alert.alert("query sent to the brand executives")
+        setText("")
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  };
+
+    const colorAvail = ["red" , "green" , "black" , "brown" ,"blue" , "pink"]
+
     const [product , setproduct] = useState<mainproduct>()
+    const [review , setreview] = useState<Review[]>([])
+    const [similarProduct , setsimilarProduct] = useState<mainproduct[]>([])
+    const [FAQs , setFAQs] = useState<queries[]>([])
 
     const fetchProduct = async ()=>{
       try {
         const response = await axios.get(`http://192.168.13.61:3000/products/view-product/${id}`)
-        console.log(response.data.product)
         setproduct(response.data.product)
+        setreview(response.data.paginatedReviews.reviews)
+        setsimilarProduct(response.data.similarProducts)
+        setFAQs(response.data.FAQs)
       } catch (error) {
         console.log(error)
       }
@@ -75,7 +113,7 @@ const ProductDetails = () => {
         fetchProduct()
     }, [])
 
-    const colorAvail = ["red" , "green" , "black" , "brown" ,"blue" , "pink"]
+
 
     const [size , setsize] = useState(6)
     const [color , setColor] = useState(colorAvail[0])
@@ -98,36 +136,6 @@ const ProductDetails = () => {
     The Nike Red Casual Shoes feature a cushioned insole that provides excellent support and reduces foot fatigue, making them ideal for daily wear. The breathable upper material keeps your feet cool and dry, while the sturdy outsole offers superior traction on various surfaces. Whether you're heading to work, running errands, or enjoying a casual day out, these shoes are your go-to choice for any occasion.
 
     With a sleek and modern design, the Nike Red Casual Shoes effortlessly complement a wide range of outfits, from jeans and t-shirts to casual dresses. The lace-up closure ensures a secure fit, while the padded collar and tongue add extra comfort. Experience the perfect combination of style and practicality with these versatile shoes that are sure to become a staple in your wardrobe. Don't miss out on the opportunity to elevate your footwear collection with the Nike Red Casual Shoes.`;
-
-  const similarProducts = [
-    {
-      _id: "1",
-      images: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"],
-      name: "Wireless Headphones",
-      brief: "High-quality wireless headphones with noise cancellation.",
-      brand: "SoundPro",
-      rating: 4.5,
-      price: "99",
-  },
-  {
-      id: "2",
-      images: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"],
-      name: "Wireless Headphones",
-      brief: "High-quality wireless headphones with noise cancellation.",
-      brand: "SoundPro",
-      rating: 4.5,
-      price: "99",
-  },
-  {
-    _id : "3",
-    images: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"],
-    name: "Wireless Headphones",
-    brief: "High-quality wireless headphones with noise cancellation.",
-    brand: "SoundPro",
-    rating: 4.5,
-    price: "99",
-  },
-  ];
 
   const reviews = [
     {
@@ -167,21 +175,21 @@ const ProductDetails = () => {
     <ScrollView style={styles.container}>
       {accessor === "seller" && (<View style={styles.performanceContainer}>
         <View style={styles.statsBox}>
-          <Text style={styles.statValue}>4.6 L</Text>
+          <Text style={styles.statValue}>{product?.inventory}</Text>
           <Text style={styles.statLabel}>Inventory</Text>
-          <Text style={styles.statLabel}>Restock | 1 Aug 2024</Text>
+          <Text style={styles.statLabel}>Restock | {product?.restock_date}</Text>
           </View>
         <View style={styles.statsBox}>
-          <Text style={styles.statValue}>250 L</Text>
+          <Text style={styles.statValue}>{product?.itemsold}</Text>
           <Text style={styles.statLabel}>Item Sold</Text>
           <Text style={styles.statLabel}>Dropping Trend</Text>
         </View>
       <View style={styles.statsBox}>
-        <Text style={styles.statValue}>15</Text>
+        <Text style={styles.statValue}>{product?.avg_delivery_day}</Text>
         <Text style={styles.statLabel}>Avg Delivery Days</Text>
         </View>
         <View style={styles.statsBox}>
-          <Text style={styles.statValue}>15</Text>
+          <Text style={styles.statValue}>{product?.item_returned}</Text>
           <Text style={styles.statLabel}>Item Returned</Text>
           </View>
       </View>)}
@@ -192,9 +200,9 @@ const ProductDetails = () => {
   style={{ width: 350, height: 250 }}
   contentContainerStyle={{ alignItems: "center" }} // Ensures images are vertically centered
 >
-  {product?.images?.map((item, index) => {
+  {product?.images.map((item, index) => {
     return (
-      <View key={index} style={{ marginRight: 10 , width : 350}}> {/* Adds spacing between images */}
+      <View key={index} style={{ marginRight: 10 , width : 350}}>
         <Image
           source={{ uri: item }}
           style={{
@@ -208,7 +216,6 @@ const ProductDetails = () => {
     );
   })}
 </ScrollView>
-
         <View style={{flexDirection : "row" , marginTop : 8 , justifyContent : 'flex-start'}}>
           {colorAvail.map((item)=>{
             return (
@@ -216,12 +223,11 @@ const ProductDetails = () => {
             )
           })}
         </View>
-        <Text style={styles.productTitle}>Nike Red Casual Shoes</Text>
-        <Text style={styles.productRating}>⭐ 4.3 (210)</Text>
-        <Text style={{fontSize : 16 , fontWeight : "500" , marginVertical : 6}}>NIke</Text>
+        <Text style={styles.productTitle}>{product?.name}</Text>
+        <Text style={styles.productRating}>⭐ {product?.rating} (210)</Text>
+        <Text style={{fontSize : 16 , fontWeight : "500" , marginVertical : 6}}>{product?.brand}</Text>
         <Text style={styles.productDescription}>
-          Stay comfy and stylish with the Puma Red Casual Shoes! Designed for maximum comfort and durability. These shoes
-          are perfect for casual outings and everyday wear.
+          {product?.brief}
         </Text>
         <Text style={{fontSize : 20 , fontWeight : "500"}}>SIze</Text>
         <View style={styles.sizeSelector}>
@@ -236,7 +242,7 @@ const ProductDetails = () => {
         <View style={styles.priceSection}>
           <View style={{flexDirection : "row" , justifyContent : "space-between" , width : "100%" , alignItems : "center"}}>
             <View style={{flexDirection : "row" , alignItems : "center" , justifyContent : "center" , width : "48%"}}>
-            <Text style={styles.price}>₹ 5555</Text>
+            <Text style={styles.price}>₹ {product?.price}</Text>
             </View>
           {accessor === "seller" && (
             <TouchableOpacity style={{height : 50 , backgroundColor : "black" , justifyContent : "center" , alignItems : "center", width : "48%"}} onPress={()=>setModalVisible1(true)}>
@@ -265,7 +271,7 @@ const ProductDetails = () => {
 
     <View style ={{padding : 20}}>
       <Text style={styles.text}>
-        {isExpanded || !shouldShowReadMore ? productDescription : `${truncatedText}...`}
+        {isExpanded || !shouldShowReadMore ? product?.features : `${truncatedText}...`}
       </Text>
       {shouldShowReadMore && (
         <TouchableOpacity onPress={() => setIsExpanded(!isExpanded)}>
@@ -280,33 +286,39 @@ const ProductDetails = () => {
         </TouchableOpacity>
       )}
     </View>
-
-      <View style={styles.similarProductsSection}>
-        <Text style={styles.sectionTitle}>Similar Top Picks</Text>
-        {similarProducts.map((product) => (
-          <ProductCard key={product._id} {...product} accessor_name='customer'/>
-        ))}
+      <View>
+        <Text style={styles.sectionTitle}>Similar Products</Text>
+          {similarProduct.map((product) => (
+            <ProductCard {...product} key={product._id} accessor_name='customer' />
+          ))}
       </View>
 
       <View style={styles.reviewsSection}>
         <Text style={styles.sectionTitle}>Customer Reviews</Text>
         <View style={{ borderBottomWidth: 1, borderBottomColor: 'gray', marginVertical: 2 , marginBottom : 2 }} />
-        {reviews.map((review) => (
-          <Reviewcard {...review} key={review.id} />
+        {review.map((review) => (
+          <Reviewcard {...review} key={review._id} />
         ))}
       </View>
 
       <View style={styles.faqSection}>
         <Text style={styles.sectionTitle}>FAQs</Text>
-        <Text style={styles.faqQuestion}>1. Do sole has the good finish?</Text>
-        <Text style={styles.faqAnswer}>
-          Yes, the sole is crafted with a nice inner material which makes it comfy and stylish.
-        </Text>
-        <Text style={styles.faqQuestion}>2. Can I customize it?</Text>
-        <Text style={styles.faqAnswer}>
-          Yes, you can visit the store to customize your shoes.
-        </Text>
-        <TextInput style={styles.queryInput} placeholder="Have a query? Ask here related to the product" />
+        {FAQs.map((faq , index) => (
+          <>
+          <Text style={styles.faqQuestion}>{index}. {faq.query}?</Text>
+          <Text style={styles.faqAnswer}>
+            {faq.answer}
+          </Text>
+          </>
+        ))}
+      <TextInput
+        style={styles.queryInput}
+        value={text}
+        onChangeText={setText} // Update state on text change
+        placeholder="Type something..."
+        onSubmitEditing={handleSubmit} // Trigger on Enter key
+        returnKeyType="done" // Display 'Done' or 'Enter' on keyboard
+      />
       </View>
       <Modal
         visible={isModalVisible1}
@@ -354,7 +366,7 @@ const ProductDetails = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   productSection: { padding: 20 , width : "100%" },
-  productImage: { width: '100%', height: "100%", resizeMode: 'contain' },
+  productImage: { width: '100%', height: 250, resizeMode: 'contain' },
   productTitle: { fontSize: 20, fontWeight: 'bold', marginVertical: 10 },
   productRating: { fontSize: 14, color: '#666' },
   productDescription: { fontSize: 14, color: '#666', marginVertical: 10 },
@@ -399,7 +411,7 @@ const styles = StyleSheet.create({
   faqSection: { padding: 20 },
   faqQuestion: { fontSize: 14, fontWeight: 'bold', marginVertical: 5 },
   faqAnswer: { fontSize: 14, color: '#666', marginBottom: 10 },
-  queryInput: { borderWidth: 1, borderColor: '#ccc', borderRadius: 5, padding: 10, marginTop: 10 },
+  queryInput: { borderWidth: 1, borderColor: '#ccc', borderRadius: 5, padding: 10, marginTop: 10 , marginBottom :60 },
   choosedSize : {
       backgroundColor : "#ff005c"
   },

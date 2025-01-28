@@ -2,7 +2,9 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface ShareButtonContextProps {
     isShared: boolean;
-    toggleShared: () => void;
+    toggleShared: (data : any) => void;
+    setData : (data : any) => void
+    data : any
 }
 
 const ShareButtonContext = createContext<ShareButtonContextProps | undefined>(undefined);
@@ -10,12 +12,16 @@ const ShareButtonContext = createContext<ShareButtonContextProps | undefined>(un
 export const ShareButtonProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [isShared, setIsShared] = useState<boolean>(false);
 
-    const toggleShared = () => {
+    const [data , setData] = useState([])
+
+    const toggleShared = (data : any) => {
         setIsShared((prev)=> !prev);
+        setData(data)
     };
 
+
     return (
-        <ShareButtonContext.Provider value={{ isShared, toggleShared }}>
+        <ShareButtonContext.Provider value={{ isShared, toggleShared , setData , data}}>
             {children}
         </ShareButtonContext.Provider>
     );

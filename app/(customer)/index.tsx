@@ -2,7 +2,7 @@ import { Image, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Searchbar } from 'react-native-paper';
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 import { FontAwesome } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import CategoryGrid from '@/components/section/searchclicksection';
 import Optionsection from '@/components/section/optionsection';
@@ -18,6 +18,7 @@ import Indexsearch from '@/components/section/indexsearch';
 import { ShareButtonProvider, useShareButton } from '@/context/sharebutton';
 import SharePage from '@/components/bottomsheet/sharepage';
 import WelcomeScreenSeller from '../../../scale-frontend-seller/app/onboardingseller/WelcomeScreen';
+import { useSocketStore } from '@/store/socketstore';
 
 //6788e8786d5e4f7411b20b5e
 
@@ -30,6 +31,10 @@ export default function HomeScreen() {
   const [searchResults, setSearchResults] = useState([]);
 
   const {isShared , toggleShared} = useShareButton()
+
+  const {initializeSocket} = useSocketStore()
+
+  initializeSocket("6788e8786d5e4f7411b20b5e")
 
 
   const data = [
