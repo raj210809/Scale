@@ -3,61 +3,94 @@ import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 import Bookmark from '../buttons/bookmark';
 
-interface product {
-    _id : string,
-    images : string[],
-    name : string,
-    brief : string,
-    brand : string,
-    rating : number,
-    price : number
+interface Product {
+  _id: string;
+  images: string[];
+  name: string;
+  brief: string;
+  brand: string;
+  rating: number;
+  price: number;
+  reviewCount?: number;
 }
 
-interface accressor {
-  accessor_name : string
+interface Accessor {
+  accessor_name: string;
 }
 
-const ProductCard = (item : product & accressor) => {
+interface ProductCardProps extends Product, Accessor {
+  isSent?: boolean;
+  time?: string;
+}
+
+const ProductCard: React.FC<ProductCardProps> = (item) => {
+  const handleViewProduct = () => {
+    router.push({
+      pathname: "/product/[id]",
+      params: {
+        id: item._id,
+        accessor: item.accessor_name,
+      }
+    });
+  };
+
   return (
-    <View style={styles.card}>
-        <View style={{flexDirection:'row' , height:170}}>
-        <View style={{width:'50%' , height : '100%'}}>
-          <ImageBackground
-        source={{ uri: item?.images[0] || "https://placeholder.com/50" }} 
-        style={styles.image}
-        resizeMode='cover'
+    <View style={[
+      styles.card,
+      item.isSent ? styles.sentCard : styles.receivedCard
+    ]}>
+      <View style={styles.imageContainer}>
+        <ImageBackground
+          source={{ uri: item.images[0] || "https://placeholder.com/50" }}
+          style={styles.image}
+          resizeMode='cover'
         >
-          <Bookmark id={item._id} type='product'/>
+          <Bookmark id={item._id} type='product' />
         </ImageBackground>
-        </View>
-        <View style={styles.content}>
+      </View>
+      
+      <View style={styles.content}>
         <Text style={styles.title}>{item.name}</Text>
         <Text style={styles.description}>{item.brief}</Text>
         <Text style={styles.brand}>{item.brand}</Text>
+        
         <View style={styles.ratingContainer}>
-          <Text style={styles.rating}>{item.rating}</Text>
-          <Text style={styles.reviewCount}>(126)</Text>
+          <Text style={styles.rating}>{item.rating.toFixed(1)}</Text>
+          <Text style={styles.reviewCount}>({item.reviewCount || 0})</Text>
         </View>
-        <Text style={styles.price}>Rs {item.price}</Text>
-        </View>
-        </View>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.viewButton} onPress={()=>{router.push({
-            pathname : "/product/[id]",
-            params : {
-                id : item._id,
-                accessor : item.accessor_name,
-            }
-          })}}>
-            <Text style={styles.buttonText}>View Product</Text>
-          </TouchableOpacity>
-          {item.accessor_name === "customer" ? <TouchableOpacity style={styles.addButton}>
+        
+        <Text style={styles.price}>Rs {item.price.toLocaleString()}</Text>
+      </View>
+
+      {item.time && (
+        <Text style={[
+          styles.time,
+          item.isSent ? styles.sentTime : styles.receivedTime
+        ]}>
+          {item.time}
+        </Text>
+      )}
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity 
+          style={styles.viewButton} 
+          onPress={handleViewProduct}
+        >
+          <Text style={styles.buttonText}>View Product</Text>
+        </TouchableOpacity>
+        
+        {item.accessor_name === "customer" && (
+          <TouchableOpacity style={styles.addButton}>
             <Text style={styles.buttonText}>Add to Bag</Text>
-          </TouchableOpacity> : null}
-          {item.accessor_name === "sellerdraft" ? <TouchableOpacity style={styles.addButton}>
+          </TouchableOpacity>
+        )}
+        
+        {item.accessor_name === "sellerdraft" && (
+          <TouchableOpacity style={styles.addButton}>
             <Text style={styles.buttonText}>Release Now</Text>
-          </TouchableOpacity> : null}
-        </View>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 };
@@ -72,16 +105,30 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
     padding: 10,
+    marginVertical: 5,
+    maxWidth: '80%',
+  },
+  sentCard: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#dcf8c6',
+  },
+  receivedCard: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#e1e1e1',
+  },
+  imageContainer: {
+    width: '100%',
+    height: 150,
+    marginBottom: 10,
   },
   image: {
-    height: "100%",
+    width: '100%',
+    height: '100%',
     borderRadius: 8,
-    marginBottom : 5
+    overflow: 'hidden',
   },
   content: {
     marginTop: 5,
-    width :'50%',
-    marginLeft : 7
   },
   title: {
     fontSize: 16,
@@ -146,6 +193,18 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  time: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+    alignSelf: 'flex-end',
+  },
+  sentTime: {
+    color: '#666',
+  },
+  receivedTime: {
+    color: '#666',
   },
 });
 

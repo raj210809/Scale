@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import axios from 'axios';
 import React, { useState, useEffect, useRef } from 'react';
 import { Searchbar } from 'react-native-paper';
 import { Dimensions } from 'react-native';
@@ -26,6 +27,20 @@ const IndexSearch = () => {
     'women\'s sandals',
     'men\'s boots',
   ];
+  const fetchCartItems = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/products/search?query=${searchQuery}`
+      );
+      console.log(response.data.products);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCartItems();
+  }, [searchQuery]);
 
   useEffect(() => {
     // Perform search when route is accessed with a query
@@ -64,6 +79,9 @@ const IndexSearch = () => {
           placeholder="Search"
           onChangeText={handleChange}
           value={searchQuery}
+          onSubmitEditing={() => {
+            handleSearch(searchQuery)
+            }}
         />
         {suggestions.length > 0 && (
           <View style={styles.suggestionsContainer}>

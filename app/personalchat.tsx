@@ -1,10 +1,40 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Animated } from "react-native"; // For the slide animation
 import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import ProductCard from "@/components/cards/productshowsmall";
 import { FontAwesome } from "@expo/vector-icons";
+import axios from "axios";
+import { useAppStore } from "@/store/store";
 
 const PersonalChat = () => {
+
+  const {selectedChatData, setSelectedChatData, setSelectedChatMessages,selectedChatMessages,addMessages} = useAppStore();
+  
+  useEffect(() => {
+    const getMessages = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/message/userId/otherUserId`,
+          {
+            
+            withCredentials: true,               
+          }
+        );
+  
+        if (response.data.messages) {
+          setSelectedChatMessages(response.data.messages);
+          console.log("SelectedChatMessages:", response.data.messages);
+        }
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+  
+    if (selectedChatData._id) {
+      getMessages();
+    }
+  }, [selectedChatData, selectedChatType, setSelectedChatMessages]);
+  
 
   const product = {
     id: 2,
@@ -44,9 +74,10 @@ const PersonalChat = () => {
     }
   };
 
-  const sendMessage = () => {
+  const sendMessage = () => {z
     if (input.trim() !== "") {
-      setMessages([...messages, { id: Date.now(), message: input, time: "Now", isSent: true }]);
+      setSelectedChatMessages([...selectedChatMessages, { id: Date.now(), message: input, time: "Now", isSent: true }]);
+      
       setInput("");
     }
   };

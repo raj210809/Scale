@@ -1,106 +1,50 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-import { ScrollView } from 'react-native-gesture-handler'
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import ProductCard from '../cards/productshowsmall';
+import axios from 'axios';
 
-interface prop {
-    searchfor : string
+interface Product {
+    id: number;
+    productImage: string;
+    productName: string;
+    productDescription: string;
+    productBrand: string;
+    productRating: number;
+    productReviewCount: number;
+    productPrice: number;
 }
 
-const Searchresult = (prop: prop) => {
-    const dummyData = [
-        {
-            id: 1,
-            productImage: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            productName: "Wireless Headphones",
-            productDescription: "High-quality wireless headphones with noise cancellation.",
-            productBrand: "SoundPro",
-            productRating: 4.5,
-            productReviewCount: 145,
-            productPrice: 99,
-        },
-        {
-            id: 2,
-            productImage: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            productName: "Wireless Headphones",
-            productDescription: "High-quality wireless headphones with noise cancellation.",
-            productBrand: "SoundPro",
-            productRating: 4.5,
-            productReviewCount: 145,
-            productPrice: 99,
-        },
-        {
-            id: 3,
-            productImage: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            productName: "Wireless Headphones",
-            productDescription: "High-quality wireless headphones with noise cancellation.",
-            productBrand: "SoundPro",
-            productRating: 4.5,
-            productReviewCount: 145,
-            productPrice: 99,
-        },
-        {
-            id: 4,
-            productImage: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            productName: "Wireless Headphones",
-            productDescription: "High-quality wireless headphones with noise cancellation.",
-            productBrand: "SoundPro",
-            productRating: 4.5,
-            productReviewCount: 145,
-            productPrice: 99,
-        },
-        {
-            id: 5,
-            productImage: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            productName: "Wireless Headphones",
-            productDescription: "High-quality wireless headphones with noise cancellation.",
-            productBrand: "SoundPro",
-            productRating: 4.5,
-            productReviewCount: 145,
-            productPrice: 99,
-        },
-        {
-            id: 6,
-            productImage: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            productName: "Wireless Headphones",
-            productDescription: "High-quality wireless headphones with noise cancellation.",
-            productBrand: "SoundPro",
-            productRating: 4.5,
-            productReviewCount: 145,
-            productPrice: 99,
-        },
-        {
-            id: 7,
-            productImage: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            productName: "Wireless Headphones",
-            productDescription: "High-quality wireless headphones with noise cancellation.",
-            productBrand: "SoundPro",
-            productRating: 4.5,
-            productReviewCount: 145,
-            productPrice: 99,
-        },
-        {
-            id: 8,
-            productImage: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            productName: "Wireless Headphones",
-            productDescription: "High-quality wireless headphones with noise cancellation.",
-            productBrand: "SoundPro",
-            productRating: 4.5,
-            productReviewCount: 145,
-            productPrice: 99,
-        },
-    ];
-  return (
-    <ScrollView style={{flex : 1}}>
-      {dummyData.map((item)=>{
-        return (
-            <ProductCard {...item} accessor_name='customer' key={item.id}/>
-        )
-      })}
-    </ScrollView>
-  )
+interface Props {
+    searchfor: string;
 }
 
-export default Searchresult
+const Searchresult = ({ searchfor }: Props) => {
+    const [products, setProducts] = useState<Product[]>([]);
 
-const styles = StyleSheet.create({})
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3000/api/products/search?query=${searchfor}`);
+                setProducts(response.data.products);
+            } catch (error) {
+                console.error('Error fetching products:', error);
+            }
+        };
+
+        if (searchfor) {
+            fetchProducts();
+        }
+    }, [searchfor]);
+
+    return (
+        <ScrollView style={{ flex: 1 }}>
+            {products.map((item) => (
+                <ProductCard {...item} accessor_name="customer" key={item.id} />
+            ))}
+        </ScrollView>
+    );
+};
+
+export default Searchresult;
+
+const styles = StyleSheet.create({});

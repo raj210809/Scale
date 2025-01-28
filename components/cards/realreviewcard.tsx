@@ -1,10 +1,10 @@
 import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
-import Commentsection from '../section/commentsection';
 import { Ionicons } from '@expo/vector-icons';
 import MediaSlider from '../section/medisslider';
 import Share from '../buttons/share';
+import Commentsection from '../section/commentsection';
 import { useShareButton } from '@/context/sharebutton';
 
 interface ReviewCardProps {
@@ -17,74 +17,111 @@ interface ReviewCardProps {
   commentsCount: number;
   sharesCount: number;
   productAvailable?: boolean;
-  onProfilePress?: () => void;
-  onLikePress?: () => void;
-  onCommentPress?: () => void;
-  onSharePress?: () => void;
+  isSent: boolean;
+  time: string;
   onViewProductPress?: () => void;
 }
 
-const Reviewcard = (prop : ReviewCardProps) => {
-  const [commentopen , setcomment] = useState(false)
-  const [liked , setliked] = useState(false)
-  const {toggleShared} = useShareButton()
+const Reviewcard: React.FC<ReviewCardProps> = (props) => {
+  const [commentOpen, setCommentOpen] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const { toggleShared } = useShareButton();
+
+  const handleProfilePress = () => {
+    router.push({
+      pathname: "/profile/[id]",
+      params: { id: "1" } // Replace with actual profile ID
+    });
+  };
+
+  const handleProductPress = () => {
+    if (props.onViewProductPress) {
+      props.onViewProductPress();
+    } else {
+      router.push({
+        pathname: "/product/[id]",
+        params: { id: "1" } // Replace with actual product ID
+      });
+    }
+  };
+
   return (
-    <View style={styles.cardContainer}>
+    <View style={[
+      styles.cardContainer,
+      props.isSent ? styles.sentContainer : styles.receivedContainer
+    ]}>
       {/* Header Section */}
-      <TouchableOpacity style={styles.header} onPress={()=>{router.push({
-        pathname : "/profile/[id]",
-        params : {id : "1"}
-      })}}>
+      <TouchableOpacity style={styles.header} onPress={handleProfilePress}>
         <Image
-          source={{
-            uri: prop.profileImageUri,
-          }}
+          source={{ uri: props.profileImageUri }}
           style={styles.profileImage}
         />
-        <TouchableOpacity style={styles.profileInfo}>
-          <Text style={styles.profileName}>{prop.profileName}</Text>
-          <Text style={styles.profileDescription}>{prop.profileDescription}</Text>
-        </TouchableOpacity>
+        <View style={styles.profileInfo}>
+          <Text style={styles.profileName}>{props.profileName}</Text>
+          <Text style={styles.profileDescription}>{props.profileDescription}</Text>
+        </View>
+        <Text style={styles.timeText}>{props.time}</Text>
       </TouchableOpacity>
 
-      {/* Main Image Section */}
-      <MediaSlider media={prop.uploaded_items} />
+      {/* Media Section */}
+      <MediaSlider media={props.uploaded_items} />
 
       {/* Caption Section */}
       <Text style={styles.caption}>
-        {prop.caption}
-        <Text style={styles.readMore}> read more</Text>
+        {props.caption}
+        {props.caption.length > 100 && (
+          <Text style={styles.readMore}> read more</Text>
+        )}
       </Text>
 
       {/* Interaction Section */}
       <View style={styles.interactionRow}>
-        <TouchableOpacity style={styles.interactionButton} onPress={()=>{setliked(!liked)}}>
-          <Ionicons name={liked ? "heart" : "heart-outline"} size={25} color={liked ? "red" : "black"} />
-          <Text style={styles.interactionText}>{prop.likesCount}</Text>
+        <TouchableOpacity 
+          style={styles.interactionButton} 
+          onPress={() => setLiked(!liked)}
+        >
+          <Ionicons 
+            name={liked ? "heart" : "heart-outline"} 
+            size={25} 
+            color={liked ? "red" : "black"} 
+          />
+          <Text style={styles.interactionText}>
+            {props.likesCount + (liked ? 1 : 0)}
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.interactionButton} onPress={()=>{setcomment(!commentopen)}}>
+
+        <TouchableOpacity 
+          style={styles.interactionButton} 
+          onPress={() => setCommentOpen(!commentOpen)}
+        >
           <Ionicons name="chatbubble-outline" size={25} color="black" />
-          <Text style={styles.interactionText}>{prop.commentsCount}</Text>
+          <Text style={styles.interactionText}>{props.commentsCount}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.interactionButton}>
-          <Share/>
-          <Text style={styles.interactionText}>{prop.sharesCount}</Text>
+
+        <TouchableOpacity 
+          style={styles.interactionButton} 
+          onPress={toggleShared}
+        >
+          <Share />
+          <Text style={styles.interactionText}>{props.sharesCount}</Text>
         </TouchableOpacity>
       </View>
-      {prop.productAvailable && <TouchableOpacity onPress={()=>{router.push({
-        pathname : "/product/[id]",
-        params : {
-          id : 1
-        }
-      })}} style={styles.productButton}>
-          <Text style={{color : '#fff'}}>View Product</Text>
-        </TouchableOpacity>}
-      {commentopen && <Commentsection/>}
+
+      {/* Product Button */}
+      {props.productAvailable && (
+        <TouchableOpacity 
+          style={styles.productButton}
+          onPress={handleProductPress}
+        >
+          <Text style={styles.productButtonText}>View Product</Text>
+        </TouchableOpacity>
+      )}
+
+      {/* Comment Section */}
+      {commentOpen && <Commentsection id={''} type={''} />}
     </View>
   );
 };
-
-export default Reviewcard;
 
 const styles = StyleSheet.create({
   cardContainer: {
@@ -97,6 +134,15 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
     elevation: 3,
+    maxWidth: '80%',
+  },
+  sentContainer: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#dcf8c6',
+  },
+  receivedContainer: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#e1e1e1',
   },
   header: {
     flexDirection: 'row',
@@ -104,13 +150,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     marginRight: 10,
   },
   profileInfo: {
-    flexDirection: 'column',
+    flex: 1,
   },
   profileName: {
     fontSize: 16,
@@ -121,35 +167,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6e6e6e',
   },
-  mainImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  pagination: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginVertical: 10,
-  },
-  paginationDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#e0e0e0',
-    marginHorizontal: 4,
-  },
-  paginationDotActive: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#d9534f',
-    marginHorizontal: 4,
+  timeText: {
+    fontSize: 12,
+    color: '#666',
+    marginLeft: 10,
   },
   caption: {
     fontSize: 14,
     color: '#000',
-    marginBottom: 10,
+    marginVertical: 10,
   },
   readMore: {
     color: '#d9534f',
@@ -159,30 +185,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginTop: 10,
-    width: '70%',
+    width: '100%',
   },
   interactionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  icon: {
-    fontSize: 18,
-    marginRight: 5,
+    paddingHorizontal: 10,
   },
   interactionText: {
     fontSize: 14,
     color: '#000',
+    marginLeft: 5,
   },
   productButton: {
     backgroundColor: '#ff005c',
-    paddingVertical: 6,
-    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 5,
-    marginVertical: 10,
-    width: '100%',
-    flexDirection : 'row',
-    justifyContent: 'center',
+    marginTop: 10,
     alignItems: 'center',
-    height: 40,
+  },
+  productButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
+
+export default Reviewcard;

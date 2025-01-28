@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
-
+import { useAppStore } from "@/store/store";
 
 interface chatitem {
     id : number,
@@ -11,6 +11,8 @@ interface chatitem {
     unreadCount : number,
     profileImage : string
 }
+
+const {setSelectedChatData} = useAppStore();
 
 const ChatItem = (item : chatitem) => {
     const handleChatPress = (item : chatitem) => {
@@ -25,6 +27,7 @@ const ChatItem = (item : chatitem) => {
               profileImage: item.profileImage,
             },
           });
+          setSelectedChatData(item);
         };
   return (
     <TouchableOpacity style={styles.container} onPress={()=>{handleChatPress(item)}}>
