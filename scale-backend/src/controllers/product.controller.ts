@@ -183,3 +183,28 @@ const getReview = async (req: Request, res: Response) : Promise<any> => {
         console.log(error);
     }
 }
+
+export const searchProducts = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { query } = req.query; // Get the search query from the request
+
+        if (!query) {
+            res.status(400).json({ message: 'Search query is required' });
+            return;
+        }
+
+        // Perform a case-insensitive search on name, brand, and description
+        const products = await Product.find({
+            $or: [
+                { name: { $regex: query, $options: 'i' } },
+                { brand: { $regex: query, $options: 'i' } },
+                { description: { $regex: query, $options: 'i' } },
+            ],
+        });
+
+        res.status(200).json({ products });
+    } catch (error) {
+        console.error('Error searching products:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};

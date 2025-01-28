@@ -27,7 +27,6 @@ const UserSchema: Schema = new Schema<IUser>(
     password: { type: String, required: true, select: false },
     termsAccepted: { type: Boolean, required: true },
     notificationPermission: { type: Boolean, default: true },
-    yourOrders: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
     mainImage: { type: String },
     coverImage: { type: String },
     googleId: { type: String, unique: true },

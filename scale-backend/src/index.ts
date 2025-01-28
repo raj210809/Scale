@@ -1,15 +1,14 @@
 import express from "express";
-// import connectDB from "./config/db";
 import dotenv from "dotenv";
 import cors from "cors";
-// import passport from "./config/passport";
-// import authRoutes from "./routes/auth.route";
+import setupSocket from "./socket.server";
 import productRoutes from "./routes/product.routes";
 import connectDB from "./config/db";
 import updateRoutes from "../src/routes/updates.routes";
-import addressRoutes from "./routes/address.routes"
-import cartRoutes from "./routes/cart.routes"
-import bookmarkRoutes from "./routes/bookmark.routes"
+import addressRoutes from "./routes/address.routes";
+import cartRoutes from "./routes/cart.routes";
+import bookmarkRoutes from "./routes/bookmark.routes";
+import messageRoutes from "./routes/message.routes";
 import { orderProcessing } from "./controllers/orderProcess.controller";
 
 dotenv.config();
@@ -29,21 +28,23 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Initialize Passport
-// app.use(passport.initialize());
-
 // Connect to MongoDB
 connectDB();
 
 // Routes
-// app.use("/auth", authRoutes);
-app.use("/products" , productRoutes)
-app.use("/updates" , updateRoutes)
-app.use("/address", addressRoutes)
-app.use("/cart", cartRoutes)
-app.use("/bookmark", bookmarkRoutes)
-app.post("/orderProcessing" , orderProcessing)
+app.use("/products", productRoutes);
+app.use("/updates", updateRoutes);
+app.use("/address", addressRoutes);
+app.use("/cart", cartRoutes);
+app.use("/bookmark", bookmarkRoutes);
+app.use("/message", messageRoutes);
+app.post("/orderProcessing", orderProcessing);
 
-app.listen(PORT, () => {
+//server
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+// Initialize Socket.IO
+setupSocket(server);
+

@@ -1,5 +1,5 @@
 import express from "express";
-import { getPresignedUrls,writeReviews,addProducts,getProducts,viewProduct , getProductByIds , getProductByBrand } from "../controllers/product.controller";
+import { getPresignedUrls,writeReviews,addProducts,getProducts,viewProduct , getProductByIds , getProductByBrand, searchProducts } from "../controllers/product.controller";
 
 const router = express.Router();
 
@@ -10,5 +10,6 @@ router.get("/get-product-by-ids",getProductByIds)
 router.get("/get-product-by-brand",getProductByBrand)
 router.get("/view-product/:product_id",viewProduct)
 router.post("/write-reviews", writeReviews)
+router.get('/search', searchProducts);
 
 export default router;
