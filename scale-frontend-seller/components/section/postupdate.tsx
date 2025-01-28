@@ -1,85 +1,96 @@
+import { ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View , Image } from 'react-native';
 import React, { useState } from 'react';
-import { Alert, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import {openPicker} from 'react-native-image-crop-picker';
+import * as MediaPicker from 'expo-image-picker';
 import axios from 'axios';
+import { Cloudfronturl } from "@/constants/contants"
 
-interface Media {
-  path : string;
-  mime : string;
-  name : string | undefined;
+interface UploadFile {
+  uri: string;
+  type: string;
 }
 
-const PostUpdate = () => {
-  const [media, setMedia] = useState({
-    path : "",
-    mime : "",
-    name : "",
-  });
-  const [heading, setHeading] = useState<Media[]>([]);
-  const [description, setDescription] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
+const Postupdate = () => {
+  const [uploading, setUploading] = useState(false);
+  const [images , setImages] = useState<string[]>([])
+  const [data , setData] = useState({
+    images : images,
+    heading : "",
+    descriptioon : "",
+    brand : "nike",
+    productTagged : []
+  })
+  const handleChange = (key , text)=>{
+    setData({
+      ...data ,
+      [key] : text
+    })
+  }
 
-  // Media picker function
   const pickMedia = async () => {
     try {
-      const selectedMedia = await openPicker({
-        mediaType: 'any',
-        multiple: false,
-      })
-
-      setMedia({
-        path: selectedMedia.path,
-        mime: selectedMedia.mime,
-        name: selectedMedia.path.split('/').pop(), // Extract the file name from the path
+      const result = await MediaPicker.launchImageLibraryAsync({
+        mediaTypes: MediaPicker.MediaTypeOptions.All, // Allow both images and videos
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+        allowsMultipleSelection: true,
       });
 
-      Alert.alert('Media Selected', `Selected: ${selectedMedia.path}`);
-    } catch (err) {
-      Alert.alert('Error', 'Failed to pick media.');
+      if (!result.canceled) {
+        const files = result.assets.map((item: any) => ({
+          uri: item.uri,
+          type: item.mimeType,
+        }));
+
+        uploadToAWS(files);
+      }
+    } catch (error) {
+      console.error('Error picking media:', error);
     }
   };
 
-  // Upload media to AWS using presigned URL
-  const uploadToAWS = async () => {
-    if (!media) {
-      Alert.alert('Error', 'Please select media to upload.');
-      return;
-    }
-
-    setIsUploading(true);
-
+  const uploadToAWS = async (files: UploadFile[]) => {
     try {
-      // Step 1: Request presigned URL from the backend
-      const backendResponse = await axios.post('http://your-backend-url.com/get-presigned-url', {
-        fileName: media.name,
-        fileType: media.mime,
+      setUploading(true);
+
+      // Step 1: Get pre-signed URLs from the backend
+      const response = await axios.post('http://192.168.13.61:3000/products/get-presignedurls', {
+        fileTypes: files.map((file) => file.type),
       });
 
-      const { presignedUrl, fileUrl } = backendResponse.data;
+      const { urls } = response.data;
 
-      // Step 2: Upload media to S3 using the presigned URL
-      const uploadResponse = await axios.put(presignedUrl, {
-        uri: media.path,
-        type: media.mime,
-        name: media.name,
-      }, {
-        headers: {
-          'Content-Type': media.mime,
-        },
-      });
+      // Step 2: Upload each file directly to S3 using the pre-signed URLs
+      await Promise.all(
+        urls.map(async (item: any, index: number) => {
+          const file = files[index];
 
-      if (uploadResponse.status === 200) {
-        Alert.alert('Success', 'Media uploaded successfully.');
-        console.log('File URL:', fileUrl);
-      } else {
-        throw new Error('Failed to upload to AWS S3.');
-      }
+          // Fetch the file content from its URI
+          const fileContent = await fetch(file.uri);
+          const blob = await fileContent.blob(); // Convert to Blob for S3 upload
+
+          // Perform the PUT request to upload the file to S3
+          const uploadResponse = await fetch(item.presignedUrl, {
+            method: 'PUT',
+            body: blob,
+            headers: {
+              'Content-Type': file.type,
+            },
+          });
+          if (uploadResponse.status == 200){
+            setImages((prevImages) => [...prevImages, `${Cloudfronturl}${item.key}`])
+          }
+          
+        })
+      );
+
+      alert('Files uploaded successfully to S3.');
     } catch (error) {
-      console.error('Error uploading media:', error);
-      Alert.alert('Error', 'Failed to upload media.');
+      console.error('Error uploading to S3:', error);
+      alert('Failed to upload files to S3.');
     } finally {
-      setIsUploading(false);
+      setUploading(false);
     }
   };
 
@@ -87,57 +98,59 @@ const PostUpdate = () => {
     <ScrollView>
       <View style={styles.container}>
         <Text style={styles.title}>Add image/video</Text>
-        <Text style={styles.subtitle}>related to announcement</Text>
-
-        <View style={styles.mediaPicker}>
-          <TouchableOpacity onPress={pickMedia}>
-            <ImageBackground
-              style={styles.imageBackground}
-              source={media ? { uri: media.path } : null}
-              imageStyle={{ borderRadius: 10 }}
-            >
-              {!media && (
-                <View style={styles.overlay}>
-                  <Text style={styles.overlayText}>Upload Image/Video</Text>
-                </View>
-              )}
-            </ImageBackground>
-          </TouchableOpacity>
+        <Text>Related to announcement</Text>
+        <View style={styles.mediaContainer}>
+          <View style={{height : "100%" , width : "100%"}}>
+            { images.length === 0 ? <ImageBackground style={styles.imageBackground}>
+              <TouchableOpacity style={styles.overlay} onPress={pickMedia}>
+                <Text>Upload Image/Video</Text>
+              </TouchableOpacity>
+            </ImageBackground> : <ScrollView horizontal pagingEnabled style={{height : "100%" , width : "100%"}}>
+              {images.map((item , index)=>{
+                return ( 
+                  <View key={index} style={{width : 365}}>
+                  <Image source={{uri : item}} style={styles.image}/>
+                  <TouchableOpacity style={styles.overlay} onPress={pickMedia}>
+                    <Text>Change Image/Video</Text>
+                  </TouchableOpacity>
+                  </View>
+                )
+              })}
+              </ScrollView>}
+          </View>
         </View>
-
-        <TextInput
-          placeholder="Heading in 5 words"
-          value={heading}
-          onChangeText={setHeading}
-          style={styles.input}
-        />
-        <TextInput
-          placeholder="Description in 150 words"
-          value={description}
-          onChangeText={setDescription}
-          style={[styles.input, { height: 100 }]}
-          multiline
-        />
-
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => Alert.alert('Upload Later', 'Media will be uploaded later.')}
-          >
-            <Text style={styles.buttonText}>Upload Later</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, isUploading && styles.disabledButton]}
-            onPress={uploadToAWS}
-            disabled={isUploading}
-          >
-            <Text style={styles.buttonText}>{isUploading ? 'Uploading...' : 'Release Now'}</Text>
-          </TouchableOpacity>
-        </View>
+      </View>
+      <TextInput
+        placeholder="Heading in 5 words"
+        style={styles.input}
+        onChangeText={(text)=> handleChange("heading" , text)}
+      />
+      <TextInput
+        placeholder="Description in 150 words"
+        style={styles.input}
+        multiline
+        onChangeText={(text)=>handleChange("description" , text)}
+      />
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => alert('Upload later functionality not implemented yet.')}
+        >
+          <Text style={styles.buttonText}>Upload Later</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => alert('Release now functionality not implemented yet.')}
+          disabled={uploading}
+        >
+          <Text style={styles.buttonText}>{uploading ? 'Uploading...' : 'Release Now'}</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
 };
+
+export default Postupdate;
 
 const styles = StyleSheet.create({
   container: {
@@ -151,10 +164,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
-  subtitle: {
-    marginBottom: 20,
-  },
-  mediaPicker: {
+  mediaContainer: {
     width: '98%',
     height: 250,
     marginTop: 20,
@@ -167,7 +177,7 @@ const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    flexDirection: 'row',
+    resizeMode : "contain"
   },
   overlay: {
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -176,9 +186,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    alignSelf : "center"
   },
-  overlayText: {
-    color: 'white',
+  image : {
+    height : "100%",
+    width : "100%",
+    resizeMode : "contain"
   },
   input: {
     borderWidth: 1,
@@ -200,16 +213,10 @@ const styles = StyleSheet.create({
     width: '48%',
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'center',
     marginTop: 20,
     height: 45,
-  },
-  disabledButton: {
-    backgroundColor: 'grey',
   },
   buttonText: {
     color: 'white',
   },
 });
-
-export default PostUpdate;

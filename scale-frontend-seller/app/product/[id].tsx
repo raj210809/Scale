@@ -2,8 +2,9 @@ import ProductCard from '@/components/cards/productshowsmall';
 import Reviewcard from '@/components/cards/reviewcard';
 import { FontAwesome } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal } from 'react-native';
+import axios from 'axios';
 
 import {
   View,
@@ -28,13 +29,12 @@ interface SimilarProduct {
 }
 
 interface Review {
-  id: string;
+  _id: string;
   name: string;
   images: string[];
   rating: string;
-  comment: string;
+  comments: string;
   date: string;
-  image: string;
 }
 
 interface mainproduct {
@@ -43,13 +43,13 @@ interface mainproduct {
   itemsold :string;
   avg_delivery_day : string;
   item_returned : string;
-  image : string[];
+  images : string[];
   colorAvail : string[]
   name : string;
   rating : string;
   numberOfRating : string;
   brand : string;
-  description : string;
+  brief : string;
   sizeAvail : number[];
   price : number;
   features : string;
@@ -62,6 +62,24 @@ const ProductDetails = () => {
     const {accessor ,id} = useLocalSearchParams()
 
     const colorAvail = ["red" , "green" , "black" , "brown" ,"blue" , "pink"]
+
+    const [product , setproduct] = useState<mainproduct>()
+    const [review , setreview] = useState<Review[]>([])
+
+    const fetchProduct = async ()=>{
+      try {
+        const response = await axios.get(`http://192.168.13.61:3000/products/view-product/${id}`)
+        setproduct(response.data.product)
+        setreview(response.data.paginatedReviews.reviews)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    useEffect(() => {
+        fetchProduct()
+    }, [])
+
+
 
     const [size , setsize] = useState(6)
     const [color , setColor] = useState(colorAvail[0])
@@ -84,39 +102,6 @@ const ProductDetails = () => {
     The Nike Red Casual Shoes feature a cushioned insole that provides excellent support and reduces foot fatigue, making them ideal for daily wear. The breathable upper material keeps your feet cool and dry, while the sturdy outsole offers superior traction on various surfaces. Whether you're heading to work, running errands, or enjoying a casual day out, these shoes are your go-to choice for any occasion.
 
     With a sleek and modern design, the Nike Red Casual Shoes effortlessly complement a wide range of outfits, from jeans and t-shirts to casual dresses. The lace-up closure ensures a secure fit, while the padded collar and tongue add extra comfort. Experience the perfect combination of style and practicality with these versatile shoes that are sure to become a staple in your wardrobe. Don't miss out on the opportunity to elevate your footwear collection with the Nike Red Casual Shoes.`;
-
-  const similarProducts = [
-    {
-      id: 1,
-      productImage: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      productName: "Wireless Headphones",
-      productDescription: "High-quality wireless headphones with noise cancellation.",
-      productBrand: "SoundPro",
-      productRating: 4.5,
-      productReviewCount: 145,
-      productPrice: 99,
-  },
-  {
-      id: 2,
-      productImage: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      productName: "Wireless Headphones",
-      productDescription: "High-quality wireless headphones with noise cancellation.",
-      productBrand: "SoundPro",
-      productRating: 4.5,
-      productReviewCount: 145,
-      productPrice: 99,
-  },
-  {
-      id: 3,
-      productImage: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      productName: "Wireless Headphones",
-      productDescription: "High-quality wireless headphones with noise cancellation.",
-      productBrand: "SoundPro",
-      productRating: 4.5,
-      productReviewCount: 145,
-      productPrice: 99,
-  },
-  ];
 
   const reviews = [
     {
@@ -156,33 +141,47 @@ const ProductDetails = () => {
     <ScrollView style={styles.container}>
       {accessor === "seller" && (<View style={styles.performanceContainer}>
         <View style={styles.statsBox}>
-          <Text style={styles.statValue}>4.6 L</Text>
+          <Text style={styles.statValue}>{product?.inventory}</Text>
           <Text style={styles.statLabel}>Inventory</Text>
-          <Text style={styles.statLabel}>Restock | 1 Aug 2024</Text>
+          <Text style={styles.statLabel}>Restock | {product?.restock_date}</Text>
           </View>
         <View style={styles.statsBox}>
-          <Text style={styles.statValue}>250 L</Text>
+          <Text style={styles.statValue}>{product?.itemsold}</Text>
           <Text style={styles.statLabel}>Item Sold</Text>
           <Text style={styles.statLabel}>Dropping Trend</Text>
         </View>
       <View style={styles.statsBox}>
-        <Text style={styles.statValue}>15</Text>
+        <Text style={styles.statValue}>{product?.avg_delivery_day}</Text>
         <Text style={styles.statLabel}>Avg Delivery Days</Text>
         </View>
         <View style={styles.statsBox}>
-          <Text style={styles.statValue}>15</Text>
+          <Text style={styles.statValue}>{product?.item_returned}</Text>
           <Text style={styles.statLabel}>Item Returned</Text>
           </View>
       </View>)}
       <View style={styles.productSection}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={true} style={{width : "100%" , height : 250}}>
-          {image.map((item , index)=>{
-            return (
-              <View key={index}>
-                <Image source={{uri : "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"}} style={styles.productImage} key={index}/>
-              </View>)
-          })}
-        </ScrollView>
+      <ScrollView
+  horizontal
+  showsHorizontalScrollIndicator={true}
+  style={{ width: 350, height: 250 }}
+  contentContainerStyle={{ alignItems: "center" }} // Ensures images are vertically centered
+>
+  {product?.images.map((item, index) => {
+    return (
+      <View key={index} style={{ marginRight: 10 , width : 350}}>
+        <Image
+          source={{ uri: item }}
+          style={{
+            width: "100%", // Define explicit width
+            height: 250, // Define explicit height
+            borderRadius: 10, // Optional: Adds rounded corners
+            resizeMode: "contain", // Ensures images fill the container proportionally
+          }}
+        />
+      </View>
+    );
+  })}
+</ScrollView>
         <View style={{flexDirection : "row" , marginTop : 8 , justifyContent : 'flex-start'}}>
           {colorAvail.map((item)=>{
             return (
@@ -190,12 +189,11 @@ const ProductDetails = () => {
             )
           })}
         </View>
-        <Text style={styles.productTitle}>Nike Red Casual Shoes</Text>
-        <Text style={styles.productRating}>⭐ 4.3 (210)</Text>
-        <Text style={{fontSize : 16 , fontWeight : "500" , marginVertical : 6}}>NIke</Text>
+        <Text style={styles.productTitle}>{product?.name}</Text>
+        <Text style={styles.productRating}>⭐ {product?.rating} (210)</Text>
+        <Text style={{fontSize : 16 , fontWeight : "500" , marginVertical : 6}}>{product?.brand}</Text>
         <Text style={styles.productDescription}>
-          Stay comfy and stylish with the Puma Red Casual Shoes! Designed for maximum comfort and durability. These shoes
-          are perfect for casual outings and everyday wear.
+          {product?.brief}
         </Text>
         <Text style={{fontSize : 20 , fontWeight : "500"}}>SIze</Text>
         <View style={styles.sizeSelector}>
@@ -210,7 +208,7 @@ const ProductDetails = () => {
         <View style={styles.priceSection}>
           <View style={{flexDirection : "row" , justifyContent : "space-between" , width : "100%" , alignItems : "center"}}>
             <View style={{flexDirection : "row" , alignItems : "center" , justifyContent : "center" , width : "48%"}}>
-            <Text style={styles.price}>₹ 5555</Text>
+            <Text style={styles.price}>₹ {product?.price}</Text>
             </View>
           {accessor === "seller" && (
             <TouchableOpacity style={{height : 50 , backgroundColor : "black" , justifyContent : "center" , alignItems : "center", width : "48%"}} onPress={()=>setModalVisible1(true)}>
@@ -239,7 +237,7 @@ const ProductDetails = () => {
 
     <View style ={{padding : 20}}>
       <Text style={styles.text}>
-        {isExpanded || !shouldShowReadMore ? productDescription : `${truncatedText}...`}
+        {isExpanded || !shouldShowReadMore ? product?.features : `${truncatedText}...`}
       </Text>
       {shouldShowReadMore && (
         <TouchableOpacity onPress={() => setIsExpanded(!isExpanded)}>
@@ -255,17 +253,10 @@ const ProductDetails = () => {
       )}
     </View>
 
-      <View style={styles.similarProductsSection}>
-        <Text style={styles.sectionTitle}>Similar Top Picks</Text>
-        {similarProducts.map((product) => (
-          <ProductCard {...product} key={product.id} accessor_name='customer'/>
-        ))}
-      </View>
-
       <View style={styles.reviewsSection}>
         <Text style={styles.sectionTitle}>Customer Reviews</Text>
         <View style={{ borderBottomWidth: 1, borderBottomColor: 'gray', marginVertical: 2 , marginBottom : 2 }} />
-        {reviews.map((review) => (
+        {review.map((review) => (
           <Reviewcard {...review} key={review.id} />
         ))}
       </View>

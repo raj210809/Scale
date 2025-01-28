@@ -1,4 +1,4 @@
-import express from "express";
+import express, { query } from "express";
 // import connectDB from "./config/db";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -10,9 +10,10 @@ import updateRoutes from "../src/routes/updates.routes";
 import addressRoutes from "./routes/address.routes"
 import cartRoutes from "./routes/cart.routes"
 import bookmarkRoutes from "./routes/bookmark.routes"
-import { orderProcessing } from "./controllers/orderProcess.controller";
-
+import orderRoutes from "./routes/order.routes"
+import queryRoutes from "./routes/query.routes"
 dotenv.config();
+import setupSocket from "./setupsocket";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -42,8 +43,11 @@ app.use("/updates" , updateRoutes)
 app.use("/address", addressRoutes)
 app.use("/cart", cartRoutes)
 app.use("/bookmark", bookmarkRoutes)
-app.post("/orderProcessing" , orderProcessing)
+app.use("/order" , orderRoutes)
+app.use("/query" , queryRoutes)
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+setupSocket(server)

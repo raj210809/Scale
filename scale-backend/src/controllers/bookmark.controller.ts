@@ -1,9 +1,12 @@
 import {Request , Response} from "express";
 import Bookmark from "../models/bookmark.models";
+import mongoose, { mongo } from "mongoose";
 
 export const addBookmark = async (req : Request , res : Response) => {
     try {
-        const { user, id , type } = req.body;
+        let { user, id , type } = req.body;
+
+        console.log(user)
 
         if(type === "product"){
         const newBookmark = new Bookmark({
@@ -30,7 +33,7 @@ export const addBookmark = async (req : Request , res : Response) => {
 export const getBookmarks = async (req : Request , res : Response) : Promise<any> => {
     const { user } = req.query;
     try {
-        const bookmarks = await Bookmark.find({user : user});
+        const bookmarks = await Bookmark.find({user : user}).populate("product")
         res.status(200).json({ bookmarks });
     } catch (error) {
         console.log(error);
@@ -49,6 +52,7 @@ export const removeBookmark = async (req : Request , res : Response) : Promise<a
 
 export const hasBookmarked = async (req : Request , res : Response) : Promise<any> => {
     const { user , type , id } = req.query;
+    console.log(id)
     try {
         const bookmark = await Bookmark.findOne({user : user , type : type , product : id});
         if(bookmark){

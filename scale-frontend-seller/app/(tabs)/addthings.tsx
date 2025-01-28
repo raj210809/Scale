@@ -2,12 +2,13 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import Postupdate from '@/components/section/postupdate'
 import AddProductSection from '@/components/section/addproduct'
+import { router } from 'expo-router'
 
 const addthings = () => {
     const [page , setpage] = useState("Post Update")
 
     return (
-      <View style={{padding : 20 , height : '100%'}}>
+      <View style={{ height : '100%'}}>
         <View>
           <TouchableOpacity style={{flexDirection : 'row' , width : '100%' , justifyContent : 'flex-end' , height : 15 , alignItems : 'center' , marginTop : 5}} onPress={()=>{router.push("/drafts")}}>
             <Text style={{marginRight : 10 , fontWeight : '800'}}>Drafts</Text>

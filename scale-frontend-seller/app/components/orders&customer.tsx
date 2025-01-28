@@ -1,72 +1,51 @@
 import { StyleSheet, Text, View , TextInput , Image, TouchableOpacity } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { ScrollView } from 'react-native-gesture-handler'
 import Ordersmallcard from '@/components/cards/ordersmallcard';
+import axios from 'axios';
 
 const Orders_customer = () => {
     const [searchText, setSearchText] = React.useState('');
 
-    const dummyOrders = [
-        {
-            id: '1',
-            customer: 'John Doe',
-            orderStatus: 'Delivered',
-            orderDate: '2023-10-01',
-            orderAmount: 150.00,
-        },
-        {
-            id: '2',
-            customer: 'Jane Smith',
-            orderStatus: 'Pending',
-            orderDate: '2023-10-02',
-            orderAmount: 200.00,
-        },
-        {
-            id: '3',
-            customer: 'Alice Johnson',
-            orderStatus: 'Shipped',
-            orderDate: '2023-10-03',
-            orderAmount: 250.00,
-        },
-        {
-            id: '4',
-            customer: 'Bob Brown',
-            orderStatus: 'Cancelled',
-            orderDate: '2023-10-04',
-            orderAmount: 300.00,
-        },
-        {
-            id: '5',
-            customer: 'Charlie Davis',
-            orderStatus: 'Processing',
-            orderDate: '2023-10-05',
-            orderAmount: 350.00,
-        },
-    ];
+    const [orders , setOrders] = React.useState([])
+
+    const brand = "nike"
+
+    const fetchorders = async () => {
+        try {
+            const response = await axios.get(`http://192.168.13.61:3000/order/get-brand-orders?brand=${brand}`)
+            setOrders(response.data.order)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect(()=>{
+        fetchorders()
+    },[])
 
     const dummyCustomers = [
         {
-            id: '1',
+            id: 1,
             name: 'John Doe',
-            imageUrl: 'https://randomuser.me/api/portraits/men/1.jpg',
+            imageUrl: 'https://randomuser.me/api/port',
+            totalSpent: 5000,
             itemsPurchased: 5,
-            totalSpent: 150.00,
         },
         {
-            id: '2',
-            name: 'Jane Smith',
-            imageUrl: 'https://randomuser.me/api/portraits/men/1.jpg',
+            id: 2,
+            name: 'Jane Doe',
+            imageUrl: 'https://randomuser.me/api/port',
+            totalSpent: 3000,
             itemsPurchased: 3,
-            totalSpent: 200.00,
         },
         {
-            id: '3',
+            id: 3,
             name: 'Alice',
-            imageUrl: 'https://randomuser.me/api/portraits/men/1.jpg',
-            itemsPurchased: 7,
-            totalSpent: 250.00,
-        }
-    ];
+            imageUrl: 'https://randomuser.me/api/port',
+            totalSpent: 1000,
+            itemsPurchased: 2,
+        },]
   return (
     <ScrollView style={styles.container}>
       {/* orders */}
@@ -100,8 +79,8 @@ const Orders_customer = () => {
         showsHorizontalScrollIndicator={false}
         style={{marginTop : 10}}
         >
-            {dummyOrders.map((order) => (
-                <Ordersmallcard {...order} key={order.id} />
+            {orders?.map((order) => (
+                <Ordersmallcard {...order} key={order._id} customer={order.address.name} />
             ))}
         </ScrollView>
         {/* top customers */}

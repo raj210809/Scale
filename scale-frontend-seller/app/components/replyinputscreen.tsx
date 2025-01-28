@@ -4,7 +4,7 @@ import { StyleSheet, View, Text, TextInput, TouchableOpacity, Modal } from 'reac
 import VisibilitySelectionScreen from './visibilityselectionscreen';
 
 const ReplyInputScreen = () => {
-  const {productId , productName , query} = useLocalSearchParams()
+  const {productId , productName , query , id} = useLocalSearchParams()
   const [reply, setReply] = useState('');
   const maxWords = 80;
   const [isModalVisible , setModalVisible] = useState(false)
@@ -24,7 +24,7 @@ const ReplyInputScreen = () => {
       <Text style={styles.wordCount}>{`${reply.split(' ').filter(Boolean).length}/${maxWords} words done.`}</Text>
       <View style={styles.actionRow}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.bbauttonText}>Back</Text>
+          <Text style={styles.backButton}>Back</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.sendButton} onPress={()=>{setModalVisible(true)}}>
           <Text style={styles.buttonText}>Send</Text>
@@ -38,7 +38,7 @@ const ReplyInputScreen = () => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <VisibilitySelectionScreen reply={reply}/>
+            <VisibilitySelectionScreen reply={reply} id={id as string}/>
           </View>
         </View>
       </Modal>

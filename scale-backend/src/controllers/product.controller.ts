@@ -1,10 +1,10 @@
 import AWS from "aws-sdk"
 import express, {Response , Request} from "express"
 import Review from "../models/review.model";
-import Product from "../models/product.model";
+import Product , {IProduct} from "../models/product.model";
 import mongoose from "mongoose";
 import { getPaginatedReviews } from "../Pagination";
-
+import Query, { IQuery } from "../models/query.models";
 
 
 export const getPresignedUrls = async (req : Request, res : Response) : Promise<any> => {
@@ -113,6 +113,58 @@ export const getProductByBrand = async (req: Request, res: Response) : Promise<a
     }
 }
 
+export const getFAQsByProductId = async (productId: string): Promise<IQuery[]> => {
+    try {
+      // Validate productId
+      if (!mongoose.Types.ObjectId.isValid(productId)) {
+        throw new Error("Invalid Product ID");
+      }
+  
+      // Query to fetch FAQs
+      const faqs = await Query.find({
+        productId: productId,
+        hasAnswerd: true,
+        visibility: "Public",
+      })
+        .sort({ updatedAt: -1 }) // Optional: Sort by most recently updated
+        .limit(3) // Limit the results to 2
+        .exec();
+  
+      return faqs;
+    } catch (error) {
+      console.error("Error fetching FAQs:", error);
+      throw new Error("Unable to fetch FAQs");
+    }
+  };
+
+async function getSimilarProducts(
+    product: IProduct,
+    limit = 3
+  ): Promise<IProduct[]> {
+    try {
+      // Define the criteria for similarity
+      const criteria = {
+        _id: { $ne: product._id }, // Exclude the current product
+        brand: product.brand, // Same brand
+        price: {
+          $gte: (parseFloat(product.price) * 0.8).toString(), // Within 20% lower
+          $lte: (parseFloat(product.price) * 1.2).toString(), // Within 20% higher
+        },
+        draft: false, // Only fetch products that are not drafts
+      };
+  
+      // Query the database
+      const similarProducts = await Product.find(criteria)
+        .limit(limit)
+        .lean();
+  
+      return similarProducts;
+    } catch (error) {
+      console.error("Error fetching similar products:", error);
+      throw new Error("Unable to fetch similar products");
+    }
+  }
+
 export const viewProduct = async (req: Request, res: Response): Promise<void> => {
     try {
       const productId = req.params.product_id;
@@ -129,10 +181,14 @@ export const viewProduct = async (req: Request, res: Response): Promise<void> =>
   
       // Fetch the paginated reviews
       const paginatedReviews = await getPaginatedReviews(productId, page, pageSize);
+      const similarProducts = await getSimilarProducts(product);
+      const FAQs = await getFAQsByProductId(productId);
   
       res.status(200).json({
         product,
         paginatedReviews,
+        similarProducts,
+        FAQs,
       });
     } catch (error) {
       console.error("Error in viewProduct:", error);
@@ -179,6 +235,23 @@ const getReview = async (req: Request, res: Response) : Promise<any> => {
     try {
         const reviews = await Review.find({ _id: { $in: ids } });
         res.status(200).json({ reviews });
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export const searchProducts = async (req: Request, res: Response) : Promise<any> => {
+    const { query } = req.query;
+    if (!query) {
+        return res.status(400).json({ message: 'Invalid or missing "query" in the request body.' });
+    }
+    try {
+        const products = await Product.find({ $or: [
+            { name: { $regex: query, $options: 'i' } },
+            { brand: { $regex: query, $options: 'i' } },
+            { category: { $regex: query, $options: 'i' } },
+        ]});
+        res.status(200).json({ products });
     } catch (error) {
         console.log(error);
     }

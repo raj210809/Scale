@@ -1,10 +1,26 @@
 import { StyleSheet, Text, View ,TouchableOpacity } from 'react-native'
-import React,{useState} from 'react'
+import React,{useEffect, useState} from 'react'
 import { FlatList, ScrollView } from 'react-native-gesture-handler';
 import ProductCard from '@/components/cards/productshowsmall';
+import axios from 'axios';
 
 const Allproducts = () => {
     const [selectedFilter, setSelectedFilter] = useState('All');
+    const brand = "nike"
+    const [products , setProducts] = useState([])
+
+    const fetchdata = async()=>{
+      const response = await axios.get("http://192.168.13.61:3000/products/get-product-by-brand",{
+        params : {
+          brand : brand
+        }
+      })
+      setProducts(response.data.products)
+    }
+
+    useEffect(()=>{
+      fetchdata()
+    },[])
 
     const dummyData = [
         {
@@ -96,9 +112,9 @@ const Allproducts = () => {
     
           {/* Product List */}
           <FlatList
-            data={dummyData}
+            data={products}
             renderItem={renderItem}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => item._id}
             contentContainerStyle={styles.listContainer}
           />
         </View>

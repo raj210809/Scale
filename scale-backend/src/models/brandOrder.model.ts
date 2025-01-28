@@ -1,4 +1,5 @@
 import mongoose,{Schema , Document} from "mongoose";
+import User from "./user.model"
 
 interface orderItems {
     product : mongoose.Types.ObjectId;
@@ -7,15 +8,18 @@ interface orderItems {
 }
 
 interface IOrderBrand extends Document {
+    user : mongoose.Types.ObjectId;
     brand : string;
     address : mongoose.Types.ObjectId;
     status : string;
     orderOn : Date;
     orderItems : orderItems[];
     totalAmount : number;
+    paymentMethod : {type : Object  , required : true};
 }
 
 const BrandOrderSchema : Schema = new Schema<IOrderBrand>({
+    user : { type : mongoose.Schema.Types.ObjectId , ref : "User" , required : true },
     brand : { type : String , required : true },
     address : { type : mongoose.Schema.Types.ObjectId , ref : "Address" , required : true },
     status : { type : String , default : "Processing" }, 

@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import YourOrder from "../models/yourorder.model";
 import Product from "../models/product.model";
 import BrandOrder from "../models/brandOrder.model";
+import User from "../models/user.model";
 
 interface ProductInterface {
   id: string;
@@ -67,11 +68,13 @@ export const orderProcessing = async (req: Request, res: Response) => {
       );
 
       const newBrandOrder = new BrandOrder({
+        user,
         brand,
         address,
         orderOn: new Date(),
         orderItems,
         totalAmount,
+        paymentMethod : paymentMode
       });
 
       await newBrandOrder.save();
@@ -83,3 +86,52 @@ export const orderProcessing = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Something went wrong." });
   }
 };
+
+export const getOrders = async (req: Request, res: Response) => {
+    try {
+        const { user } = req.query;
+    
+        // Fetch orders and populate the `product` and `address` fields
+        const orders = await YourOrder.find({ user })
+            .populate("product")
+            .populate("address"); 
+    
+        res.status(200).json({ orders });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Something went wrong" });
+    }
+}
+
+export const getBrandOrder = async (req: Request, res: Response) => {
+    try {
+        const { brand } = req.query;
+    
+        // Fetch order and populate the `product` and `address` fields
+        const order = await BrandOrder.find({ brand })
+            .populate("address");
+            
+    
+        res.status(200).json({ order });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Something went wrong" });
+    }
+}
+
+export const getOrderById = async (req: Request, res: Response) => {
+    try {
+        const { orderId } = req.query;
+        console.log(orderId);
+    
+        // Fetch order and populate the `product` and `address` fields
+        const order = await BrandOrder.findById(orderId)
+                .populate("address")
+        const user = await User.findById(order?.user)
+
+        res.status(200).json({ order , user });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Something went wrong" });
+    }
+}

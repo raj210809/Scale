@@ -1,15 +1,35 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { StyleSheet, View, Text, TouchableOpacity, FlatList } from 'react-native';
+import axios from 'axios';
+
+interface Query {
+  _id : string,
+  productName : string,
+  productId : string,
+  query : string,
+  hasAnswerd : boolean
+}
 
 const QueryListScreen = () => {
 
   const router = useRouter();
-  const queries = [
-    { id: '1', productName: 'Air Max 2024', productId: '123456', query: 'Hi, when will the new Air Max 2024 be available in size 10?' },
-    { id: '2', productName: 'Dri-FIT T-Shirts', productId: '654321', query: 'What material are the Dri-FIT T-shirts made of, and how durable are they?' },
-  ];
+  const [queries, setQueries] = React.useState([]);
+  const brand = "nike";
+
+  const fetchQueries = async () => {
+    const response = await axios.get('http://192.168.13.61:3000/query/getQuery',{
+      params : {
+        brand : brand
+      }
+    });
+    setQueries(response.data);
+  }
+
+  useEffect(() => {
+    fetchQueries();
+  }, []);
 
   const renderQuery = ({ item }) => (
     <View style={styles.queryCard}>
@@ -23,8 +43,8 @@ const QueryListScreen = () => {
           style={styles.replyButton}
           onPress={()=>{
             router.push({
-              pathname : '/seller/components/replyinputscreen',
-              params : {productId : item.productId, productName : item.productName, query : item.query}
+              pathname : '/components/replyinputscreen',
+              params : {productId : item.productId, productName : item.productName, query : item.query , id : item._id}
             })}}
         >
           <Text style={styles.buttonText}>Send reply</Text>
@@ -37,7 +57,7 @@ const QueryListScreen = () => {
     <FlatList
       data={queries}
       renderItem={renderQuery}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => item._id}
       contentContainerStyle={styles.container}
     />
   );

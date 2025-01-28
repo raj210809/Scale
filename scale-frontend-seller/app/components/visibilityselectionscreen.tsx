@@ -1,18 +1,28 @@
+import axios from 'axios';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 
 interface reply {
-  reply : string
+  reply : string,
+  id : string
 }
 
 const VisibilitySelectionScreen = (reply  : reply) => {
 
-  const handleVisibilitySelection = (visibility) => {
-    console.log(`Reply: ${reply.reply}`);
-    console.log(`Visibility: ${visibility}`);
-    // Save or process the reply with the selected visibility
-    router.back()
+  const handleVisibilitySelection = async (visibility : string) => {
+    try {
+      const response = await axios.post('http://192.168.13.61:3000/query/postAnswer',{
+        id : reply.id,
+        answer : reply.reply,
+        visibility : visibility
+      })
+      if(response.status === 200){
+        router.back()
+      }
+    } catch (error) {
+      console.log(error)
+    }
   };
 
   return (
